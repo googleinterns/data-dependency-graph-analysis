@@ -33,51 +33,45 @@ class Neo4jGraph:
 
     ...
 
-    Attributes
-    ----------
-    driver : GraphDatabase.driver object
-        Establishes connections with neo4j database, including server URIs, credentials and other configuration.
+    Attributes:
+        driver: GraphDatabase.driver object that establishes connections with neo4j database, including server URIs,
+                credentials and other configuration.
 
-    Methods
-    -------
-    close()
-        Closes the neo4j driver.
+    Methods:
+        close()
+            Closes the neo4j driver.
 
-    generate_dataset_collection(dataset_collection_id)
-        Generates a dataset collection with a given id.
+        generate_dataset_collection(dataset_collection_id)
+            Generates a dataset collection with a given id.
 
-    generate_system_collection(system_collection_id)
-        Generates a system collection with a given id.
+        generate_system_collection(system_collection_id)
+            Generates a system collection with a given id.
 
-    generate_dataset(dataset_id, dataset_collection_id, slo)
-        Generates a dataset with a given id, creates a connection to its dataset collection.
+        generate_dataset(dataset_id, dataset_collection_id, slo)
+            Generates a dataset with a given id, creates a connection to its dataset collection.
 
-    generate_system(system_id, system_collection_id, system_critic)
-        Generates a system with a given id, creates a connection to its system collection.
+        generate_system(system_id, system_collection_id, system_critic)
+            Generates a system with a given id, creates a connection to its system collection.
 
-    generate_processing(system_id, dataset_id, processing_id, impact, freshness, action="INPUTS")
-        Generates a processing node, that represents dataset - system relationship.
-        This method also creates connections: dataset - processing, system - processing.
-        Action parameter denotes if the dataset is an input to the system, or an output.
+        generate_processing(system_id, dataset_id, processing_id, impact, freshness, action="INPUTS")
+            Generates a processing node, that represents dataset - system relationship.
+            This method also creates connections: dataset - processing, system - processing.
+            Action parameter denotes if the dataset is an input to the system, or an output.
 
-    generate_env(env_id, env_name, env_owner, env_oncall)
-        Generates an environment with a given id and attributes.
+        generate_env(env_id, env_name, env_owner, env_oncall)
+            Generates an environment with a given id and attributes.
 
-    generate_data_integrity(data_integrity_id, dataset_id, data_integrity_rec_time, data_integrity_volat,
-                            data_integrity_reg_time, data_integrity_rest_time)
-        Generates a data integrity node, that corresponds to a specific dataset, having the attributes.
+        generate_data_integrity(data_integrity_id, dataset_id, data_integrity_rec_time, data_integrity_volat,
+                                data_integrity_reg_time, data_integrity_rest_time)
+            Generates a data integrity node, that corresponds to a specific dataset, having the attributes.
 
     """
     def __init__(self, uri, user, password):
         """
-        Parameters
-        ----------
-        uri : str
-            The connection URI for the driver.
-        user : str
-            Username for authentication.
-        password : str
-            Password for authentication.
+        Args:
+            uri: A string for the connection URI for the driver.
+            user: A string for username for authentication.
+            password: A string for password for authentication.
         """
         self.driver = GraphDatabase.driver(uri, auth=(user, password), encrypted=False)
 
@@ -91,15 +85,11 @@ class Neo4jGraph:
             dataset_collection_id: 1,
             description: Dataset collection number 1.
 
-        Parameters
-        ----------
-        dataset_collection_id : int
-            Dataset collection id, is unique.
+        Args:
+            dataset_collection_id: Dataset collection id, is unique and integer.
 
-        Raises
-        ------
-        ServiceUnavailable
-            Web socket error that occurs when having problems connecting to neo4j.
+        Raises:
+            ServiceUnavailable: Web socket error that occurs when having problems connecting to neo4j.
         """
         with self.driver.session() as session:
             try:
@@ -121,7 +111,7 @@ class Neo4jGraph:
 
         query_output = tx.run(query)  # Returns an iterative with one dataset collection
         logging.info(f"Run cypher query to generate dataset collection: {query}.")
-        return [row["dataset_collection"]["dataset_collection_id"] for row in query_output][0]
+        return next(iter(query_output))["dataset_collection"]["dataset_collection_id"]
 
     def generate_system_collection(self, system_collection_id):
         """Generates a system collection node with id and description based on the id.
@@ -129,15 +119,11 @@ class Neo4jGraph:
             system_collection_id: 1,
             description: System collection number 1.
 
-        Parameters
-        ----------
-        system_collection_id : int
-            System collection id, is unique.
+        Args:
+            system_collection_id: System collection id, is unique and integer.
 
-        Raises
-        ------
-        ServiceUnavailable
-            Web socket error that occurs when having problems connecting to neo4j.
+        Raises:
+            ServiceUnavailable: Web socket error that occurs when having problems connecting to neo4j.
         """
         with self.driver.session() as session:
             try:
@@ -159,7 +145,7 @@ class Neo4jGraph:
 
         query_output = tx.run(query)  # Returns an iterative with one system collection
         logging.info(f"Run cypher query to generate system collection: {query}.")
-        return [row["system_collection"]["system_collection_id"] for row in query_output][0]
+        return next(iter(query_output))["system_collection"]["system_collection_id"]
 
     def generate_dataset(self, dataset_id, dataset_collection_id, slo):
         """Generates a dataset node with id, collection id, regex, name, slo and description.
@@ -173,21 +159,13 @@ class Neo4jGraph:
 
         Creating connection between dataset with id 1 and dataset collection with id 2.
 
-        Parameters
-        ----------
-        dataset_id : int
-            Dataset id, is unique.
+        Args:
+            dataset_id: Dataset id, is unique and integer.
+            dataset_collection_id: Dataset collection this dataset belongs to, integer.
+            slo: Represents how often the dataset is written, string.
 
-        dataset_collection_id: int
-            Dataset collection this dataset belongs to.
-
-        slo: str
-            Represents how often the dataset is written.
-
-        Raises
-        ------
-        ServiceUnavailable
-            Web socket error that occurs when having problems connecting to neo4j.
+        Raises:
+            ServiceUnavailable: Web socket error that occurs when having problems connecting to neo4j.
         """
         with self.driver.session() as session:
             try:
@@ -229,21 +207,13 @@ class Neo4jGraph:
 
         Creating a connection between system with id 1 and system collection with id 2.
 
-        Parameters
-        ----------
-        system_id : int
-            System id, is unique.
+        Args:
+            system_id: System id, is unique and integer.
+            system_critic: System criticality type, string.
+            system_collection_id: System collection this system belongs to, integer.
 
-        system_critic: str
-            System criticality type.
-
-        system_collection_id: int
-            System collection this system belongs to.
-
-        Raises
-        ------
-        ServiceUnavailable
-            Web socket error that occurs when having problems connecting to neo4j.
+        Raises:
+            ServiceUnavailable: Web socket error that occurs when having problems connecting to neo4j.
         """
         with self.driver.session() as session:
             try:
@@ -286,31 +256,17 @@ class Neo4jGraph:
         Also, will create connections between dataset with id 2 and processing with id 1, connection INPUTS between
         system id 3 and processing id 1.
 
-        Parameters
-        ----------
-        system_id: int
-            System id that creates this processing.
+        Args:
+            system_id: System id that creates this processing, integer.
+            dataset_id : Dataset id that inputs or outputs the system, integer.
+            processing_id: Dataset processing id, is unique and integer.
+            impact: Represents the impact of the dataset on the system, string.
+            freshness: Represent freshness criticality for dataset staleness, string.
+            action: Denotes if the dataset is an input to the system, or the output, string, optional.
+                    Can be one of: INPUTS, or OUTPUTS. INPUTS by default.
 
-        dataset_id : int
-            Dataset id that inputs or outputs the system.
-
-        processing_id: int
-            Dataset processing id, is unique.
-
-        impact: str
-            Represents the impact of the dataset on the system.
-
-        freshness: str
-            Represent freshness criticality for dataset staleness.
-
-        action: str, optional
-            Denotes if the dataset is an input to the system, or the output.
-            Can be one of: INPUTS, or OUTPUTS. INPUTS by default.
-
-        Raises
-        ------
-        ServiceUnavailable
-            Web socket error that occurs when having problems connecting to neo4j.
+        Raises:
+            ServiceUnavailable: Web socket error that occurs when having problems connecting to neo4j.
         """
         with self.driver.session() as session:
             try:
@@ -352,24 +308,14 @@ class Neo4jGraph:
             owner: John Smith,
             oncall: Sammy Jones
 
-        Parameters
-        ----------
-        env_id : int
-            Environment id, is unique.
+        Args:
+            env_id : Environment id, is unique and integer.
+            env_name: Name of the environment, string.
+            env_owner: Owner of the environment, string.
+            env_oncall: Oncall for the environment, string.
 
-        env_name: str
-            Name of the environment
-
-        env_owner: str
-            Owner of the environment
-
-        env_oncall: str
-            Oncall for the environment
-
-        Raises
-        ------
-        ServiceUnavailable
-            Web socket error that occurs when having problems connecting to neo4j.
+        Raises:
+            ServiceUnavailable: Web socket error that occurs when having problems connecting to neo4j.
         """
         with self.driver.session() as session:
             try:
@@ -388,7 +334,7 @@ class Neo4jGraph:
         )
         query_output = tx.run(query)  # Returns an iterable with one environment
         logging.info(f"Run cypher query to generate environment: {query}.")
-        return [row["env"]["env_id"] for row in query_output][0]
+        return next(iter(query_output))["env"]["env_id"]
 
     def generate_data_integrity(self, data_integrity_id, dataset_id, data_integrity_rec_time, data_integrity_volat,
                                 data_integrity_reg_time, data_integrity_rest_time):
@@ -401,30 +347,16 @@ class Neo4jGraph:
             data_integrity_reg_time: 150,
             data_integrity_rest_time: 10
 
-        Parameters
-        ----------
-        data_integrity_id : int
-            Data integrity id, is unique.
+        Args:
+            data_integrity_id: Data integrity id, is unique and integer.
+            dataset_id: Id of the dataset with this data integrity, integer.
+            data_integrity_rec_time: Reconstruction time of the dataset in seconds, integer.
+            data_integrity_volat: Is the dataset volatile, boolean.
+            data_integrity_reg_time: Regeneration time of the dataset in seconds, integer.
+            data_integrity_rest_time: Restoration time of the dataset in seconds, integer.
 
-        dataset_id: int
-            Id of the dataset with this data integrity.
-
-        data_integrity_rec_time: int
-            Reconstruction time of the dataset, seconds.
-
-        data_integrity_volat: bool
-            Is the dataset volatile
-
-        data_integrity_reg_time: int
-            Regeneration time of the dataset, seconds.
-
-        data_integrity_rest_time: int
-            Restoration time of the dataset, seconds.
-
-        Raises
-        ------
-        ServiceUnavailable
-            Web socket error that occurs when having problems connecting to neo4j.
+        Raises:
+            ServiceUnavailable: Web socket error that occurs when having problems connecting to neo4j.
         """
 
         with self.driver.session() as session:
