@@ -1,3 +1,10 @@
+# This file contains all the config for graph generation
+# *_count variables describe number of nodes in a graph
+# *_count_map variables contain a map, in which key is the connection/attribute, and value is count of occurrence
+# *_proba_map variables contain a map, in whick key is the connection/attribute, and value is probability
+# *_range* variables contain range of attribute values, that have a uniform probability distribution
+
+
 dataset:
   dataset_count: 24963
   dataset_read_count_map: "[0:12733 1:6530 2:2593 3:952 4:491 5:440 6:245 7:166 8:163 9:90 10:116 11:56 12:57 13:40

@@ -1,3 +1,5 @@
+# This is the file that includes basic config for graph connection generation
+
 dataset:
   dataset_count: 24927
   # Map {Number of systems this dataset is an input to: count datasets with the same condition}
