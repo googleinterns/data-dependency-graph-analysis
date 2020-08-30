@@ -21,6 +21,8 @@ if __name__ == '__main__':
     dataset_write_count_map = process_map(config["dataset"]["dataset_write_count_map"])
     dataset_write_count = sum(dataset_write_count_map.values())
 
+    dataset_slo_range_seconds = config["dataset"]["dataset_slo_range"]
+
     # System params
     system_count = config["system"]["system_count"]
     system_input_count_map = process_map(config["system"]["system_inputs_count_map"])
@@ -43,8 +45,8 @@ if __name__ == '__main__':
     env_type_count_map = process_map(config["env"]["env_count_map"], enum=True)
 
     # Data processing params
-    dataset_impact_count_map = process_map(config["data_processing"]["dataset_impact_proba_map"], proba=True, enum=True)
-    dataset_criticality_count_map = process_map(config["data_processing"]["dataset_criticality_proba_map"],
+    dataset_impact_proba_map = process_map(config["data_processing"]["dataset_impact_proba_map"], proba=True, enum=True)
+    dataset_criticality_proba_map = process_map(config["data_processing"]["dataset_criticality_proba_map"],
                                                 proba=True, enum=True)
 
     # Data integrity params
