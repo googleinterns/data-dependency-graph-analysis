@@ -1,4 +1,6 @@
 import yaml
+from connection_generator import ConnectionGenerator
+from attribute_generator import AttributeGenerator
 
 
 def process_map(config_map, proba=False, enum=False):
@@ -20,6 +22,8 @@ if __name__ == '__main__':
     dataset_read_count = sum(dataset_read_count_map.values())
     dataset_write_count_map = process_map(config["dataset"]["dataset_write_count_map"])
     dataset_write_count = sum(dataset_write_count_map.values())
+
+    dataset_slo_range_seconds = config["dataset"]["dataset_slo_range"]
 
     # System params
     system_count = config["system"]["system_count"]
@@ -43,13 +47,46 @@ if __name__ == '__main__':
     env_type_count_map = process_map(config["env"]["env_count_map"], enum=True)
 
     # Data processing params
-    dataset_impact_count_map = process_map(config["data_processing"]["dataset_impact_proba_map"], proba=True, enum=True)
-    dataset_criticality_count_map = process_map(config["data_processing"]["dataset_criticality_proba_map"],
+    dataset_impact_proba_map = process_map(config["data_processing"]["dataset_impact_proba_map"], proba=True, enum=True)
+    dataset_criticality_proba_map = process_map(config["data_processing"]["dataset_criticality_proba_map"],
                                                 proba=True, enum=True)
 
     # Data integrity params
     data_restoration_range_seconds = config["data_integrity"]["restoration_range_seconds"]
     data_regeneration_range_seconds = config["data_integrity"]["regeneration_range_seconds"]
     data_reconstruction_range_seconds = config["data_integrity"]["reconstruction_range_seconds"]
-    data_volatility_value, data_volatility_count = process_map(config["data_integrity"]["volatality_proba_map"],
-                                                               proba=True)
+    data_volatility_proba_map = process_map(config["data_integrity"]["volatality_proba_map"], proba=True)
+
+    graph_connections = ConnectionGenerator(dataset_count=dataset_count,
+                                            dataset_count_map=datasets_in_collection_count_map,
+                                            system_count=system_count,
+                                            system_count_map=systems_in_collection_count_map,
+                                            dataset_read_count=dataset_read_count,
+                                            system_input_count=system_input_count,
+                                            dataset_write_count=dataset_write_count,
+                                            system_output_count=system_output_count,
+                                            dataset_read_count_map=dataset_read_count_map,
+                                            system_input_count_map=system_input_count_map,
+                                            dataset_write_count_map=dataset_write_count_map,
+                                            system_output_count_map=system_output_count_map)
+
+    graph_connections.generate()
+    system_write_conn_count = sum([len(i) for i in graph_connections.dataset_write_conn_systems.values()])
+    system_read_conn_count = sum([len(i) for i in graph_connections.dataset_read_conn_systems.values()])
+    dataset_system_connection_count = system_write_conn_count + system_read_conn_count
+
+    graph_attributes = AttributeGenerator(
+        dataset_count,
+        system_count,
+        dataset_system_connection_count,
+        env_type_count_map,
+        dataset_slo_range_seconds,
+        data_restoration_range_seconds,
+        data_regeneration_range_seconds,
+        data_reconstruction_range_seconds,
+        data_volatility_proba_map,
+        dataset_impact_proba_map,
+        dataset_criticality_proba_map,
+        system_criticality_proba_map)
+
+    graph_attributes.generate()
