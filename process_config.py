@@ -1,6 +1,7 @@
 import yaml
 from connection_generator import ConnectionGenerator
 from attribute_generator import AttributeGenerator
+from neo4jgraph import Neo4jGraph
 
 
 def process_map(config_map, proba=False, enum=False):
@@ -90,3 +91,62 @@ if __name__ == '__main__':
         system_criticality_proba_map)
 
     graph_attributes.generate()
+
+    graph = Neo4jGraph("bolt://0.0.0.0", "neo4j", "password")
+
+    # Generate dataset collections
+    for i in range(1, dataset_collection_count + 1):
+        graph.generate_dataset_collection(i)
+
+    # Generate system collection
+    for i in range(1, system_collection_count + 1):
+        graph.generate_system_collection(i)
+
+    # Generate datasets
+    for i in range(1, dataset_count + 1):
+        graph.generate_dataset(dataset_id=i,
+                               dataset_collection_id=graph_connections.datasets_conn_collection[i],
+                               slo=graph_attributes.dataset_attributes["dataset_slos"][i - 1],
+                               env=graph_attributes.dataset_attributes["dataset_environments"][i - 1])
+
+    # Generate systems
+    for i in range(1, system_count + 1):
+        graph.generate_system(system_id=i,
+                              system_collection_id=graph_connections.systems_conn_collection[i],
+                              system_critic=graph_attributes.system_attributes["system_criticalities"][i - 1],
+                              env=graph_attributes.system_attributes["system_environments"][i - 1])
+
+    # Generate data integrity
+    for i in range(1, dataset_count + 1):
+        restoration_time = graph_attributes.data_integrity_attributes["data_restoration_time"][i - 1]
+        regeneration_time = graph_attributes.data_integrity_attributes["data_regeneration_time"][i - 1]
+        reconstruction_time = graph_attributes.data_integrity_attributes["data_reconstruction_time"][i - 1]
+        volatility = graph_attributes.data_integrity_attributes["data_volatility"][i - 1]
+        graph.generate_data_integrity(dataset_id=i,
+                                      data_integrity_id=i,
+                                      data_integrity_rec_time=restoration_time,
+                                      data_integrity_reg_time=regeneration_time,
+                                      data_integrity_rest_time=reconstruction_time,
+                                      data_integrity_volat=volatility)
+
+    # Generate connections between dataset read and system input
+    processing_id = 1
+    for dataset_read in graph_connections.dataset_read_conn_systems:
+        for system_input in graph_connections.dataset_read_conn_systems[dataset_read]:
+            graph.generate_processing(system_id=system_input,
+                                      dataset_id=dataset_read,
+                                      processing_id=processing_id,
+                                      impact=graph_attributes.dataset_processing_attributes["dataset_impacts"][processing_id - 1],
+                                      freshness=graph_attributes.dataset_processing_attributes["dataset_freshness"][processing_id - 1])
+            processing_id += 1
+
+    # Generate connections between system output and dataset write
+    for dataset_write in graph_connections.dataset_write_conn_systems:
+        for system_output in graph_connections.dataset_write_conn_systems[dataset_write]:
+            graph.generate_processing(system_id=system_output,
+                                      dataset_id=dataset_write,
+                                      processing_id=processing_id,
+                                      impact=graph_attributes.dataset_processing_attributes["dataset_impacts"][processing_id - 1],
+                                      freshness=graph_attributes.dataset_processing_attributes["dataset_freshness"][processing_id - 1],
+                                      action="OUTPUTS")
+            processing_id += 1
