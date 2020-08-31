@@ -147,15 +147,16 @@ class Neo4jGraph:
         logging.info(f"Run cypher query to generate system collection: {query}.")
         return next(iter(query_output))["system_collection"]["system_collection_id"]
 
-    def generate_dataset(self, dataset_id, dataset_collection_id, slo):
+    def generate_dataset(self, dataset_id, dataset_collection_id, slo, env):
         """Generates a dataset node with id, collection id, regex, name, slo and description.
-        Creating a dataset with id 1, collection id 2, slo '01:00:00' will create a node with these attributes:
+        Creating a dataset with id 1, collection id 2, slo '01:00:00' env TEST will create a node with these attributes:
             dataset_id: 1,
             dataset_collection_id: 2
             regex_grouping: data.1.*
             dataset_name: dataset.1
             dataset_description: Dataset number 1
             slo: 01:00:00
+            env: TEST
 
         Creating connection between dataset with id 1 and dataset collection with id 2.
 
@@ -163,13 +164,15 @@ class Neo4jGraph:
             dataset_id: Dataset id, is unique and integer.
             dataset_collection_id: Dataset collection this dataset belongs to, integer.
             slo: Represents how often the dataset is written, string.
+            env: Environment type of the dataset, string.
 
         Raises:
             ServiceUnavailable: Web socket error that occurs when having problems connecting to neo4j.
         """
         with self.driver.session() as session:
             try:
-                session_log = session.write_transaction(self._generate_dataset, dataset_id, dataset_collection_id, slo)
+                session_log = session.write_transaction(self._generate_dataset, dataset_id, dataset_collection_id,
+                                                        slo, env)
                 for row in session_log:
                     logging.info(f'Generated dataset {row["dataset"][0]} with regex grouping {row["dataset"][1]} '
                                  f'and dataset collection {row["dataset_collection"]}')
@@ -178,14 +181,14 @@ class Neo4jGraph:
                 raise
 
     @staticmethod
-    def _generate_dataset(tx, dataset_id, dataset_collection_id, slo):
+    def _generate_dataset(tx, dataset_id, dataset_collection_id, slo, env):
         """Creates and runs a query for dataset creation. Creates a link to a corresponding dataset collection."""
         query = (
             f'MATCH (dataset_collection:dataset_collection) '
             f'WHERE dataset_collection.dataset_collection_id = {dataset_collection_id} '
             f'MERGE (dataset:dataset {{dataset_id: {dataset_id}, dataset_collection_id: {dataset_collection_id}, '
             f'regex_grouping: "data.{dataset_id}.*", dataset_name: "dataset.{dataset_id}", '
-            f'dataset_description: "Dataset number {dataset_id}", slo: "{slo}" }}) '
+            f'dataset_description: "Dataset number {dataset_id}", slo: "{slo}", env: "{env}" }}) '
             f'MERGE (dataset_collection) -[:CONTAINS] -> (dataset) '
             f'RETURN dataset_collection, dataset'
         )
@@ -195,15 +198,17 @@ class Neo4jGraph:
         return [{"dataset_collection": row["dataset_collection"]["dataset_collection_id"],
                  "dataset": (row["dataset"]["dataset_id"], row["dataset"]["regex_grouping"])} for row in query_output]
 
-    def generate_system(self, system_id, system_critic, system_collection_id):
+    def generate_system(self, system_id, system_critic, system_collection_id, env):
         """Generates a system with id and description based on the id.
-        Creating a system with id 1, collection id 2, system_critic 'LEVEL_1' will create a node with these attributes:
+        Creating a system with id 1, collection id 2, system_critic 'LEVEL_1', env PROD will create a node with
+        these attributes:
             system_id: 1,
             system_collection_id: 2
             regex_grouping: system.1.*
             system_name: system.1
             system_description: System number 1
             system_critic: LEVEL_1
+            env: PROD
 
         Creating a connection between system with id 1 and system collection with id 2.
 
@@ -211,13 +216,15 @@ class Neo4jGraph:
             system_id: System id, is unique and integer.
             system_critic: System criticality type, string.
             system_collection_id: System collection this system belongs to, integer.
+            env: Environment type of the system, string.
 
         Raises:
             ServiceUnavailable: Web socket error that occurs when having problems connecting to neo4j.
         """
         with self.driver.session() as session:
             try:
-                session_log = session.write_transaction(self._generate_system, system_id, system_collection_id, system_critic)
+                session_log = session.write_transaction(self._generate_system, system_id, system_collection_id,
+                                                        system_critic, env)
                 for row in session_log:
                     logging.info(f'Generated system {row["system"][0]} with regex grouping {row["system"][1]} and '
                                  f'system collection {row["system_collection"]}')
@@ -227,14 +234,14 @@ class Neo4jGraph:
                 raise
 
     @staticmethod
-    def _generate_system(tx, system_id, system_collection_id, system_critic):
+    def _generate_system(tx, system_id, system_collection_id, system_critic, env):
         """Creates and runs a query for system creation. Creates a link to a corresponding system collection."""
         query = (
             f'MATCH (system_collection:system_collection) '
             f'WHERE system_collection.system_collection_id = {system_collection_id} '
             f'MERGE (system:system {{system_id: {system_id}, system_collection_id: {system_collection_id}, '
             f'regex_grouping: "system.{system_id}.*", system_name: "system.{system_id}", '
-            f'system_description: "System number {system_id}", system_critic: {system_critic}}}) '
+            f'system_description: "System number {system_id}", system_critic: {system_critic}, env_type: "{env}"}}) '
             f'MERGE (system_collection) -[:CONTAINS] -> (system) '
             f'RETURN system_collection, system'
         )
