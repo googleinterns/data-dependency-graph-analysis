@@ -24,7 +24,7 @@ if __name__ == '__main__':
     dataset_write_count_map = process_map(config["dataset"]["dataset_write_count_map"])
     dataset_write_count = sum(dataset_write_count_map.values())
 
-    dataset_slo_range_seconds = config["dataset"]["dataset_slo_range"]
+    dataset_slo_range_seconds = config["dataset"]["dataset_slo_range_seconds"]
 
     # System params
     system_count = config["system"]["system_count"]
@@ -91,31 +91,33 @@ if __name__ == '__main__':
         system_criticality_proba_map)
 
     graph_attributes.generate()
-
-    graph = Neo4jGraph("bolt://0.0.0.0", "neo4j", "password")
-
+    print("Finished with param generation.")
+    graph = Neo4jGraph("bolt://0.0.0.0", "neo4j", "neo4j")
+    print("Initialized graph")
     # Generate dataset collections
     for i in range(1, dataset_collection_count + 1):
         graph.generate_dataset_collection(i)
-
+    print("Generate dataset collections")
     # Generate system collection
     for i in range(1, system_collection_count + 1):
         graph.generate_system_collection(i)
-
+    print("Generate system collections")
     # Generate datasets
-    for i in range(1, dataset_count + 1):
-        graph.generate_dataset(dataset_id=i,
-                               dataset_collection_id=graph_connections.datasets_conn_collection[i],
-                               slo=graph_attributes.dataset_attributes["dataset_slos"][i - 1],
-                               env=graph_attributes.dataset_attributes["dataset_environments"][i - 1])
-
+    for dataset_collection_id in graph_connections.datasets_conn_collection:
+        for dataset_id in graph_connections.datasets_conn_collection[dataset_collection_id]:
+            graph.generate_dataset(dataset_id=dataset_id,
+                                   dataset_collection_id=dataset_collection_id,
+                                   slo=graph_attributes.dataset_attributes["dataset_slos"][dataset_id - 1],
+                                   env=graph_attributes.dataset_attributes["dataset_environments"][dataset_id - 1])
+    print("Generate datasets")
     # Generate systems
-    for i in range(1, system_count + 1):
-        graph.generate_system(system_id=i,
-                              system_collection_id=graph_connections.systems_conn_collection[i],
-                              system_critic=graph_attributes.system_attributes["system_criticalities"][i - 1],
-                              env=graph_attributes.system_attributes["system_environments"][i - 1])
-
+    for system_collection_id in graph_connections.systems_conn_collection:
+        for system_id in graph_connections.systems_conn_collection[system_collection_id]:
+            graph.generate_system(system_id=system_id,
+                                  system_collection_id=system_collection_id,
+                                  system_critic=graph_attributes.system_attributes["system_criticalities"][system_id - 1],
+                                  env=graph_attributes.system_attributes["system_environments"][system_id - 1])
+    print("Generate systems")
     # Generate data integrity
     for i in range(1, dataset_count + 1):
         restoration_time = graph_attributes.data_integrity_attributes["data_restoration_time"][i - 1]
@@ -128,7 +130,7 @@ if __name__ == '__main__':
                                       data_integrity_reg_time=regeneration_time,
                                       data_integrity_rest_time=reconstruction_time,
                                       data_integrity_volat=volatility)
-
+    print("Generate data integrity.")
     # Generate connections between dataset read and system input
     processing_id = 1
     for dataset_read in graph_connections.dataset_read_conn_systems:
@@ -139,7 +141,7 @@ if __name__ == '__main__':
                                       impact=graph_attributes.dataset_processing_attributes["dataset_impacts"][processing_id - 1],
                                       freshness=graph_attributes.dataset_processing_attributes["dataset_freshness"][processing_id - 1])
             processing_id += 1
-
+    print("Generate read input.")
     # Generate connections between system output and dataset write
     for dataset_write in graph_connections.dataset_write_conn_systems:
         for system_output in graph_connections.dataset_write_conn_systems[dataset_write]:
@@ -150,3 +152,4 @@ if __name__ == '__main__':
                                       freshness=graph_attributes.dataset_processing_attributes["dataset_freshness"][processing_id - 1],
                                       action="OUTPUTS")
             processing_id += 1
+    print("Generate write output.")

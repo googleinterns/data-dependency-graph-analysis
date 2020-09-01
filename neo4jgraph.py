@@ -192,7 +192,6 @@ class Neo4jGraph:
             f'MERGE (dataset_collection) -[:CONTAINS] -> (dataset) '
             f'RETURN dataset_collection, dataset'
         )
-
         query_output = tx.run(query)
         logging.info(f"Run cypher query to create a dataset: {query}.")
         return [{"dataset_collection": row["dataset_collection"]["dataset_collection_id"],
@@ -241,7 +240,7 @@ class Neo4jGraph:
             f'WHERE system_collection.system_collection_id = {system_collection_id} '
             f'MERGE (system:system {{system_id: {system_id}, system_collection_id: {system_collection_id}, '
             f'regex_grouping: "system.{system_id}.*", system_name: "system.{system_id}", '
-            f'system_description: "System number {system_id}", system_critic: {system_critic}, env_type: "{env}"}}) '
+            f'system_description: "System number {system_id}", system_critic: "{system_critic}", env_type: "{env}"}}) '
             f'MERGE (system_collection) -[:CONTAINS] -> (system) '
             f'RETURN system_collection, system'
         )
@@ -294,7 +293,7 @@ class Neo4jGraph:
         query = (
             f'MATCH (system:system), (dataset:dataset) '
             f'WHERE system.system_id = {system_id} AND dataset.dataset_id = {dataset_id} '
-            f'MERGE (processing:processing {{processing_id: {processing_id}, impact: {impact}, freshness: {freshness}}}) '
+            f'MERGE (processing:processing {{processing_id: {processing_id}, impact: "{impact}", freshness: "{freshness}"}}) '
             f'MERGE (processing) -[:{action}] -> (dataset) '
             f'MERGE (system) - [:CREATES] -> (processing) '
             f'RETURN dataset, system, processing '
@@ -384,8 +383,8 @@ class Neo4jGraph:
         query = (
             f'MATCH (dataset:dataset) WHERE dataset.dataset_id = {dataset_id} '
             f'MERGE (data_integrity:data_integrity {{data_integrity_id: {data_integrity_id}, '
-            f'data_integrity_rec_time: {data_integrity_rec_time}, data_integrity_volat: {data_integrity_volat}, '
-            f'data_integrity_reg_time: {data_integrity_reg_time}, data_integrity_rest_time: {data_integrity_rest_time} }}) '
+            f'data_integrity_rec_time: "{data_integrity_rec_time}", data_integrity_volat: {data_integrity_volat}, '
+            f'data_integrity_reg_time: "{data_integrity_reg_time}", data_integrity_rest_time: "{data_integrity_rest_time}" }}) '
             f'MERGE (dataset) -[:has] -> (data_integrity) '
             f'RETURN dataset, data_integrity '
         )
