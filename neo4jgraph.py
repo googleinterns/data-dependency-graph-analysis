@@ -16,7 +16,7 @@ While creating the nodes, the following two way connections will be created:
     system - system collection
     system - dataset processing
     dataset processing - dataset
-    dataset integrity - dataset
+    dataset integrity - dataset collection
 
 To use this module, neo4j server has to be started and running.
 Neo4j Docker image can be used to set it up and can be found here: https://hub.docker.com/_/neo4j.
@@ -250,7 +250,7 @@ class Neo4jGraph:
         return [{"system_collection": row["system_collection"]["system_collection_id"],
                  "system": (row["system"]["system_id"], row["system"]["regex_grouping"])} for row in query_output]
 
-    def generate_processing(self, system_id, dataset_id, processing_id, impact, freshness, action="INPUTS"):
+    def generate_processing(self, system_id, dataset_id, processing_id, impact, freshness, inputs=True):
         """Generates a dataset processing node with id, impact and freshness.
 
         Creating a processing node with id 1, dataset id 2, system is 3, impact LEVEL_2, freshness LEVEL_1,
@@ -268,14 +268,14 @@ class Neo4jGraph:
             processing_id: Dataset processing id, is unique and integer.
             impact: Represents the impact of the dataset on the system, string.
             freshness: Represent freshness criticality for dataset staleness, string.
-            action: Denotes if the dataset is an input to the system, or the output, string, optional.
-                    Can be one of: INPUTS, or OUTPUTS. INPUTS by default.
+            inputs: Denotes if the dataset is an input to the system, or the output, boolean.
 
         Raises:
             ServiceUnavailable: Web socket error that occurs when having problems connecting to neo4j.
         """
         with self.driver.session() as session:
             try:
+                action = "<-[:INPUTS] -" if inputs else " -[:OUTPUTS] ->"
                 session_log = session.write_transaction(self._generate_processing, system_id, dataset_id, processing_id,
                                                         impact, freshness, action)
                 for row in session_log:
@@ -294,8 +294,8 @@ class Neo4jGraph:
             f'MATCH (system:system), (dataset:dataset) '
             f'WHERE system.system_id = {system_id} AND dataset.dataset_id = {dataset_id} '
             f'MERGE (processing:processing {{processing_id: {processing_id}, impact: "{impact}", freshness: "{freshness}"}}) '
-            f'MERGE (processing) -[:{action}] -> (dataset) '
-            f'MERGE (system) - [:CREATES] -> (processing) '
+            f'MERGE (processing) {action} (dataset) '
+            f'MERGE (system) {action} (processing) '
             f'RETURN dataset, system, processing '
         )
 
@@ -342,8 +342,8 @@ class Neo4jGraph:
         logging.info(f"Run cypher query to generate environment: {query}.")
         return next(iter(query_output))["env"]["env_id"]
 
-    def generate_data_integrity(self, data_integrity_id, dataset_id, data_integrity_rec_time, data_integrity_volat,
-                                data_integrity_reg_time, data_integrity_rest_time):
+    def generate_data_integrity(self, data_integrity_id, dataset_collection_id, data_integrity_rec_time,
+                                data_integrity_volat, data_integrity_reg_time, data_integrity_rest_time):
         """Generates a data integrity node.
         Creating a data integrity with id 1, dataset_id 2, reconstruction time 100 s, volatality True,
         regeneration time 150 s, restoration time 10 s will create a node with these attributes:
@@ -355,7 +355,7 @@ class Neo4jGraph:
 
         Args:
             data_integrity_id: Data integrity id, is unique and integer.
-            dataset_id: Id of the dataset with this data integrity, integer.
+            dataset_collection_id: Id of the dataset collection with this data integrity, integer.
             data_integrity_rec_time: Reconstruction time of the dataset in seconds, integer.
             data_integrity_volat: Is the dataset volatile, boolean.
             data_integrity_reg_time: Regeneration time of the dataset in seconds, integer.
@@ -367,29 +367,30 @@ class Neo4jGraph:
 
         with self.driver.session() as session:
             try:
-                session_log = session.write_transaction(self._generate_data_integrity, data_integrity_id, dataset_id,
-                                                        data_integrity_rec_time, data_integrity_volat, data_integrity_reg_time,
+                session_log = session.write_transaction(self._generate_data_integrity, data_integrity_id,
+                                                        dataset_collection_id, data_integrity_rec_time,
+                                                        data_integrity_volat, data_integrity_reg_time,
                                                         data_integrity_rest_time)
                 for row in session_log:
-                    logging.info(f'Generated data integrity {row["dataset"]} for dataset {row["data_integrity"]}.')
+                    logging.info(f'Generated data integrity {row["dataset_collection"]} for dataset collection {row["data_integrity"]}.')
             except ServiceUnavailable as exception:
                 logging.error(exception)
                 raise
 
     @staticmethod
-    def _generate_data_integrity(tx, data_integrity_id, dataset_id, data_integrity_rec_time, data_integrity_volat,
-                                 data_integrity_reg_time, data_integrity_rest_time):
+    def _generate_data_integrity(tx, data_integrity_id, dataset_collection_id, data_integrity_rec_time,
+                                 data_integrity_volat, data_integrity_reg_time, data_integrity_rest_time):
         """Creates and runs a query for data integrity creation. Creates a link to a corresponding dataset."""
         query = (
-            f'MATCH (dataset:dataset) WHERE dataset.dataset_id = {dataset_id} '
+            f'MATCH (dataset_collection:dataset_collection) WHERE dataset_collection.dataset_collection_id = {dataset_collection_id} '
             f'MERGE (data_integrity:data_integrity {{data_integrity_id: {data_integrity_id}, '
             f'data_integrity_rec_time: "{data_integrity_rec_time}", data_integrity_volat: {data_integrity_volat}, '
             f'data_integrity_reg_time: "{data_integrity_reg_time}", data_integrity_rest_time: "{data_integrity_rest_time}" }}) '
-            f'MERGE (dataset) -[:has] -> (data_integrity) '
-            f'RETURN dataset, data_integrity '
+            f'MERGE (dataset_collection) - [:has] - (data_integrity) '
+            f'RETURN dataset_collection, data_integrity '
         )
 
         query_output = tx.run(query)
         logging.info(f"Run cypher query to generate data integrity: {query}.")
-        return [{"dataset": row["dataset"]["dataset_id"],
+        return [{"dataset_collection": row["dataset_collection"]["dataset_collection_id"],
                  "data_integrity": row["data_integrity"]["data_integrity_id"]} for row in query_output]

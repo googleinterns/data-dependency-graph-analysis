@@ -119,12 +119,12 @@ if __name__ == '__main__':
                                   env=graph_attributes.system_attributes["system_environments"][system_id - 1])
     print("Generate systems")
     # Generate data integrity
-    for i in range(1, dataset_count + 1):
+    for i in range(1, dataset_collection_count + 1):
         restoration_time = graph_attributes.data_integrity_attributes["data_restoration_time"][i - 1]
         regeneration_time = graph_attributes.data_integrity_attributes["data_regeneration_time"][i - 1]
         reconstruction_time = graph_attributes.data_integrity_attributes["data_reconstruction_time"][i - 1]
         volatility = graph_attributes.data_integrity_attributes["data_volatility"][i - 1]
-        graph.generate_data_integrity(dataset_id=i,
+        graph.generate_data_integrity(dataset_collection_id=i,
                                       data_integrity_id=i,
                                       data_integrity_rec_time=restoration_time,
                                       data_integrity_reg_time=regeneration_time,
@@ -139,7 +139,8 @@ if __name__ == '__main__':
                                       dataset_id=dataset_read,
                                       processing_id=processing_id,
                                       impact=graph_attributes.dataset_processing_attributes["dataset_impacts"][processing_id - 1],
-                                      freshness=graph_attributes.dataset_processing_attributes["dataset_freshness"][processing_id - 1])
+                                      freshness=graph_attributes.dataset_processing_attributes["dataset_freshness"][processing_id - 1],
+                                      inputs=True)
             processing_id += 1
     print("Generate read input.")
     # Generate connections between system output and dataset write
@@ -150,6 +151,6 @@ if __name__ == '__main__':
                                       processing_id=processing_id,
                                       impact=graph_attributes.dataset_processing_attributes["dataset_impacts"][processing_id - 1],
                                       freshness=graph_attributes.dataset_processing_attributes["dataset_freshness"][processing_id - 1],
-                                      action="OUTPUTS")
+                                      inputs=False)
             processing_id += 1
     print("Generate write output.")
