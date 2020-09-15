@@ -59,23 +59,28 @@ class ConnectionGenerator:
         generate()
             Generates all the needed connections for data dependency mapping graph.
     """
-    def __init__(self, dataset_count, dataset_count_map, system_count, system_count_map, dataset_read_count,
-                 system_input_count, dataset_write_count, system_output_count, dataset_read_count_map,
-                 dataset_write_count_map, system_input_count_map, system_output_count_map):
-        self.dataset_count = dataset_count
-        self.dataset_count_map = dataset_count_map
+    def __init__(self, dataset_params, system_params, dataset_to_system_params, collection_params):
+        """
+        Args:
+             dataset_params: DatasetParams object.
+             system_params: SystemParams object.
+             dataset_to_system_params: DatasetToSystemParams object.
+             collection_params: CollectionParams object.
+        """
+        self.dataset_count = dataset_params.dataset_count
+        self.dataset_count_map = collection_params.dataset_count_map
 
-        self.system_count = system_count
-        self.system_count_map = system_count_map
+        self.system_count = system_params.system_count
+        self.system_count_map = collection_params.system_count_map
 
-        self.dataset_read_count = dataset_read_count
-        self.dataset_write_count = dataset_write_count
-        self.system_input_count = system_input_count
-        self.system_output_count = system_output_count
-        self.dataset_read_count_map = dataset_read_count_map
-        self.system_input_count_map = system_input_count_map
-        self.dataset_write_count_map = dataset_write_count_map
-        self.system_output_count_map = system_output_count_map
+        self.dataset_read_count = dataset_to_system_params.dataset_read_count
+        self.dataset_write_count = dataset_to_system_params.dataset_write_count
+        self.system_input_count = dataset_to_system_params.system_input_count
+        self.system_output_count = dataset_to_system_params.system_output_count
+        self.dataset_read_count_map = dataset_to_system_params.dataset_read_count_map
+        self.system_input_count_map = dataset_to_system_params.system_input_count_map
+        self.dataset_write_count_map = dataset_to_system_params.dataset_write_count_map
+        self.system_output_count_map = dataset_to_system_params.system_output_count_map
 
         self.datasets_conn_collection = {}
         self.systems_conn_collection = {}
