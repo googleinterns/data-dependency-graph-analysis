@@ -111,10 +111,9 @@ class ConnectionGenerator:
         random.shuffle(element_values)
         random.shuffle(elements_per_group)
 
-        it = iter(element_values)
-
         # Split element ids into chunks to get connections for each group.
-        group_to_elements = {i + 1: set(islice(it, 0, elements_per_group[i])) for i in range(len(elements_per_group))}
+        group_to_elements = {i + 1: set(islice(element_values, 0, elements_per_group[i]))
+                             for i in range(len(elements_per_group))}
 
         return group_to_elements
 

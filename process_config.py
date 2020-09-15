@@ -1,3 +1,8 @@
+"""Graph Generation Config Reader
+This script reads the config from full_config.yaml file and processes it to be usable.
+It saves config to variables, and converts map strings to python dictionaries.
+"""
+
 import yaml
 from connection_generator import ConnectionGenerator
 
@@ -10,6 +15,17 @@ from config_params.system_params import SystemParams
 
 
 def process_map(config_map, proba=False, enum=False):
+    """Converts string map in format [key1:value1 key2:value2] into a dictionary.
+       key - represents a count of connections (integer) or enums (string).
+       value - represents a count of occurrences (integer) or probability (float).
+   Args:
+       config_map: string that contains the map
+       proba: boolean, true if values are probabilities, not counts.
+       enum: boolean, true if keys are enums, not integers.
+
+   Returns:
+       A dictionary of keys and values in converted format.
+   """
     processed_map = {j[0]: j[1] for j in [i.split(":") for i in config_map.strip("[]").split()]}
     keys = [int(k) if not enum else k for k in processed_map.keys()]
     values = [int(v) if not proba else float(v) for v in processed_map.values()]
