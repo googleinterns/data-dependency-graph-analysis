@@ -13,7 +13,7 @@ import random
 
 class AttributeGenerator:
     """
-    A class to generate random connections between node ids, based on distribution maps.
+    A class to generate random attributes for nodes based on distribution or range of values.
     ...
     Attributes:
         dataset_count: Integer of how many datasets are in a graph.
@@ -36,7 +36,7 @@ class AttributeGenerator:
 
     Methods:
         generate_time()
-            Generates time from given range in seconds.
+            Generates time strings from given range in seconds.
         generate_from_proba()
             Generates value from given probability map.
         _generate_dataset_attributes()
@@ -50,31 +50,24 @@ class AttributeGenerator:
         generate()
             Generates all the needed attributes for data dependency mapping graph.
     """
-    def __init__(self,
-                 dataset_count,
-                 system_count,
-                 dataset_system_connection_count,
-                 env_count_map,
-                 dataset_slo_range,
-                 data_restoration_range_seconds,
-                 data_regeneration_range_seconds,
-                 data_reconstruction_range_seconds,
-                 data_volatility_proba_map,
-                 dataset_impact_proba_map,
-                 dataset_criticality_proba_map,
-                 system_criticality_proba_map):
-        self.dataset_count = dataset_count
-        self.system_count = system_count
-        self.dataset_system_connection_count = dataset_system_connection_count
-        self.env_count_map = env_count_map
-        self.dataset_slo_range = dataset_slo_range
-        self.data_restoration_range_seconds = data_restoration_range_seconds
-        self.data_regeneration_range_seconds = data_regeneration_range_seconds
-        self.data_reconstruction_range_seconds = data_reconstruction_range_seconds
-        self.data_volatility_proba_map = data_volatility_proba_map
-        self.dataset_impact_proba_map = dataset_impact_proba_map
-        self.dataset_criticality_proba_map = dataset_criticality_proba_map
-        self.system_criticality_proba_map = system_criticality_proba_map
+    def __init__(self, dataset_params, system_params, data_integrity_params, processing_params, connection_params):
+        self.system_count = system_params.system_count
+        self.system_env_count_map = system_params.system_env_count_map
+        self.system_criticality_proba_map = system_params.system_criticality_proba_map
+
+        self.dataset_count = dataset_params.dataset_count
+        self.dataset_env_count_map = dataset_params.dataset_env_count_map
+        self.dataset_slo_range = dataset_params.dataset_slo_range
+
+        self.data_restoration_range_seconds = data_integrity_params.data_restoration_range_seconds
+        self.data_regeneration_range_seconds = data_integrity_params.data_regeneration_range_seconds
+        self.data_reconstruction_range_seconds = data_integrity_params.data_reconstruction_range_seconds
+        self.data_volatility_proba_map = data_integrity_params.data_volatility_proba_map
+
+        self.dataset_impact_proba_map = processing_params.dataset_impact_proba_map
+        self.dataset_criticality_proba_map = processing_params.dataset_criticality_proba_map
+
+        self.dataset_system_connection_count = connection_params.dataset_system_connection_count
 
         self.dataset_attributes = {}
         self.system_attributes = {}
@@ -83,7 +76,7 @@ class AttributeGenerator:
 
     @staticmethod
     def generate_time(seconds_range, n=1):
-        """Generates n random times in given seconds range in format '1d 2h 10m 46s'"""
+        """Generates n random time strings in given seconds range in format '1d 2h 10m 46s'"""
         total_seconds = [random.randint(seconds_range[0], seconds_range[1]) for _ in range(n)]
         seconds = [i % 60 for i in total_seconds]
         minutes = [i // 60 for i in total_seconds]
