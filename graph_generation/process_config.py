@@ -4,7 +4,7 @@ It saves config to variables, and converts map strings to python dictionaries.
 """
 
 import yaml
-from connection_generator import ConnectionGenerator
+from graph_generation.connection_generator import ConnectionGenerator
 
 from config_params.collection_params import CollectionParams
 from config_params.data_integrity_params import DataIntegrityParams
