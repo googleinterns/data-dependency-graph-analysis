@@ -195,12 +195,12 @@ class ConnectionGenerator:
                                                                                    self.system_collection_count_map)
 
     def _dataset_collection_to_collection(self):
-        """Generates dataset collection - dataset one to many connections."""
+        """Generates collection - dataset collection one to many connections."""
         self.dataset_collections_conn_collection = self.get_one_to_many_connections(self.dataset_collection_count,
                                                                                     self.dataset_collection_count_map)
 
     def _dataset_to_dataset_collection(self):
-        """Generates collection - dataset collection one to many connections."""
+        """Generates dataset collection - dataset one to many connections."""
         self.datasets_conn_collection = self.get_one_to_many_connections(self.dataset_count, self.dataset_count_map)
 
     def _system_to_system_collection(self):
