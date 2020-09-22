@@ -1,7 +1,7 @@
 """
 This module implements methods for protobuf data dependency mapping graph creation.
 
-It allows to create nodes of type:
+It allows to create the following messages:
     collection
     dataset collection
     system collection
@@ -10,15 +10,6 @@ It allows to create nodes of type:
     environment
     dataset processing
     data integrity
-
-While creating the nodes, the following two way connections will be created:
-    dataset collection - collection
-    system collection - collection
-    dataset - dataset collection
-    system - system collection
-    system - dataset processing
-    dataset processing - dataset
-    dataset integrity - dataset
 """
 
 from proto import config_pb2
@@ -51,9 +42,6 @@ class ProtoGraph:
         generate_processing(system_id, dataset_id, processing_id, impact, freshness, action="INPUTS")
             Generates a processing node, that represents dataset - system relationship.
             Action parameter denotes if the dataset is an input to the system, or an output.
-
-        generate_env(env_id, env_name, env_owner, env_oncall)
-            Generates an environment with a given id and attributes.
 
         generate_data_integrity(data_integrity_id, dataset_id, data_integrity_rec_time, data_integrity_volat,
                                 data_integrity_reg_time, data_integrity_rest_time)
