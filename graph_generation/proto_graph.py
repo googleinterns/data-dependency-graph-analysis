@@ -87,7 +87,7 @@ class ProtoGraph:
             return system_criticality_dict[system_criticality]
         else:
             logging.error("Incorrect system criticality value. Setting NEVER as a default.")
-            return system_criticality_dict["NEVER"]
+            return system_criticality_dict["CRITICAL_OTHER"]
 
     @staticmethod
     def _get_processing_impact_enum(impact):
@@ -194,7 +194,7 @@ class ProtoGraph:
             os.remove(filename)
         elif os.path.isfile(filename):
             raise ValueError("Graph database with this file already exists.")
-        with open(filename, "ab") as f:
+        with open(filename, "wb") as f:
             f.write(self.graph.SerializeToString())
         logging.info(f"Proto graph saved to {filename}.")
 
