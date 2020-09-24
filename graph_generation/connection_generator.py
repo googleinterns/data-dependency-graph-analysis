@@ -130,6 +130,10 @@ class ConnectionGenerator:
             group_to_elements[i + 1] = element_values[last_index:last_index + elements_per_group[i]]
             last_index += elements_per_group[i]
 
+        # In case we don't have a full config - assign rest of elements to a last group.
+        if last_index != element_count - 1:
+            group_to_elements[len(elements_per_group)] += element_values[last_index:]
+
         return group_to_elements
 
     @staticmethod
