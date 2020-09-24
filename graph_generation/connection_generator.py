@@ -4,6 +4,8 @@ This module implements methods for generating random connections between nodes i
 Method generate() will create all the necessary connections for the graph:
     dataset <-> dataset collection
     system <-> system collection
+    dataset collection <-> collection
+    system collection <-> collection
     dataset read <-> system input
     dataset write <-> system output
 """
@@ -35,10 +37,12 @@ class ConnectionGenerator:
                                  dataset writes.
         system_output_count_map: Dictionary int:int that maps number of dataset writes by system output to count of
                                  system outputs.
-        datasets_conn_collection: Dictionary int:int that maps dataset collection id to dataset ids.
-        systems_conn_collection: Dictionary int:int that maps system collection id to system ids.
-        dataset_read_conn_systems: Dictionary int:int that maps dataset read id to system ids this dataset inputs to.
-        dataset_write_conn_systems: Dictionary int:int that maps dataset write id to system ids this dataset outputs from.
+        dataset_collections_conn_collection: Dictionary int:[int] that maps collection id to dataset collection ids.
+        system_collections_conn_collection: Dictionary int:[int] that maps collection id to system collection ids.
+        datasets_conn_collection: Dictionary int:[int] that maps dataset collection id to dataset ids.
+        systems_conn_collection: Dictionary int:[int] that maps system collection id to system ids.
+        dataset_read_conn_systems: Dictionary int:[int] that maps dataset read id to system ids this dataset inputs to.
+        dataset_write_conn_systems: Dictionary int:[int] that maps dataset write id to system ids this dataset outputs from.
 
     Methods:
         get_one_to_many_connections()
@@ -72,9 +76,13 @@ class ConnectionGenerator:
         """
         self.dataset_count = dataset_params.dataset_count
         self.dataset_count_map = collection_params.dataset_count_map
+        self.dataset_collection_count = collection_params.dataset_collection_count
+        self.dataset_collection_count_map = collection_params.dataset_collection_count_map
 
         self.system_count = system_params.system_count
         self.system_count_map = collection_params.system_count_map
+        self.system_collection_count = collection_params.system_collection_count
+        self.system_collection_count_map = collection_params.system_collection_count_map
 
         self.dataset_read_count = dataset_to_system_params.dataset_read_count
         self.dataset_write_count = dataset_to_system_params.dataset_write_count
@@ -85,6 +93,8 @@ class ConnectionGenerator:
         self.dataset_write_count_map = dataset_to_system_params.dataset_write_count_map
         self.system_output_count_map = dataset_to_system_params.system_output_count_map
 
+        self.dataset_collections_conn_collection = {}
+        self.system_collections_conn_collection = {}
         self.datasets_conn_collection = {}
         self.systems_conn_collection = {}
         self.dataset_read_conn_systems = {}
@@ -105,6 +115,7 @@ class ConnectionGenerator:
         element_values = list(range(1, element_count + 1))
 
         # Get number of elements for each group id from their count.
+
         elements_per_group = [i for i in element_count_map for _ in range(element_count_map[i])]
 
         # Randomise element ids and group ids.
@@ -112,8 +123,12 @@ class ConnectionGenerator:
         random.shuffle(elements_per_group)
 
         # Split element ids into chunks to get connections for each group.
-        group_to_elements = {i + 1: set(islice(element_values, 0, elements_per_group[i]))
-                             for i in range(len(elements_per_group))}
+        group_to_elements = {}
+
+        last_index = 0
+        for i in range(len(elements_per_group)):
+            group_to_elements[i + 1] = element_values[last_index:last_index + elements_per_group[i]]
+            last_index += elements_per_group[i]
 
         return group_to_elements
 
@@ -174,12 +189,22 @@ class ConnectionGenerator:
 
         return element_1_conn_element_2
 
+    def _system_collection_to_collection(self):
+        """Generates collection - system collection one to many connections."""
+        self.system_collections_conn_collection = self.get_one_to_many_connections(self.system_collection_count,
+                                                                                   self.system_collection_count_map)
+
+    def _dataset_collection_to_collection(self):
+        """Generates collection - dataset collection one to many connections."""
+        self.dataset_collections_conn_collection = self.get_one_to_many_connections(self.dataset_collection_count,
+                                                                                    self.dataset_collection_count_map)
+
     def _dataset_to_dataset_collection(self):
-        """Generates dataset - dataset collection one to many connections."""
+        """Generates dataset collection - dataset one to many connections."""
         self.datasets_conn_collection = self.get_one_to_many_connections(self.dataset_count, self.dataset_count_map)
 
     def _system_to_system_collection(self):
-        """Generates system - system collection one to many connections."""
+        """Generates system collection - system one to many connections."""
         self.systems_conn_collection = self.get_one_to_many_connections(self.system_count, self.system_count_map)
 
     def _dataset_read_to_system_input(self):
@@ -198,6 +223,8 @@ class ConnectionGenerator:
 
     def generate(self):
         """Generate all connections for a graph."""
+        self._dataset_collection_to_collection()
+        self._system_collection_to_collection()
         self._dataset_to_dataset_collection()
         self._system_to_system_collection()
         self._dataset_read_to_system_input()

@@ -98,7 +98,7 @@ class AttributeGenerator:
         """Generates slo and environments for dataset."""
         dataset_slos = self.generate_time(self.dataset_slo_range, n=self.dataset_count)
         # View counts as probability of being picked
-        dataset_environments = self.generate_from_proba(self.env_count_map, n=self.dataset_count)
+        dataset_environments = self.generate_from_proba(self.dataset_env_count_map, n=self.dataset_count)
 
         self.dataset_attributes["dataset_slos"] = dataset_slos
         self.dataset_attributes["dataset_environments"] = dataset_environments
@@ -107,7 +107,7 @@ class AttributeGenerator:
         """Generate system criticality and system environments."""
         system_criticalities = self.generate_from_proba(self.system_criticality_proba_map, n=self.system_count)
         # View counts as probability of being picked
-        system_environments = self.generate_from_proba(self.env_count_map, n=self.system_count)
+        system_environments = self.generate_from_proba(self.system_env_count_map, n=self.system_count)
 
         self.system_attributes["system_criticalities"] = system_criticalities
         self.system_attributes["system_environments"] = system_environments

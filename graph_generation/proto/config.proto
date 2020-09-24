@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+message ProtoGraph{
+  message Collection {
+      int64 collection_id = 1;
+  }
+
+  message DatasetCollection {
+    int64 dataset_collection_id = 1;
+    int64 collection_id = 2;
+  }
+
+  message SystemCollection {
+    int64 system_collection_id = 1;
+    int64 collection_id = 2;
+  }
+
+  enum Env {
+    DEVELOPMENT_ENV = 0;
+    PERSONAL_ENV = 1;
+    PRODUCTION_ENV = 2;
+    STAGING_ENV = 3;
+    TESTING_ENV = 4;
+    UNKNOWN_ENV = 5;
+  }
+
+  message Dataset {
+    int64 dataset_id = 1;
+    int64 dataset_collection_id = 2;
+    string slo = 3;
+    Env dataset_env = 4;
+  }
+
+  message System {
+    int64 system_id = 1;
+    int64 system_collection_id = 2;
+    enum SystemCriticality {
+      NOT_CRITICAL = 0;
+      CRITICAL_CAN_CAUSE_S0_OUTAGE = 1;
+      CRITICAL_SIGNIFICANT_RUN_RATE = 2;
+      CRITICAL_OTHER = 3;
+    }
+    SystemCriticality system_critic = 3;
+    Env system_env = 4;
+  }
+
+  message Processing {
+    int64 system_id = 1;
+    int64 dataset_id = 2;
+    int64 processing_id = 3;
+
+    enum Impact {
+      DOWN = 0;
+      SEVERELY_DEGRADED = 1;
+      DEGRADED = 2;
+      OPPORTUNITY_LOSS = 3;
+      NONE = 4;
+    }
+    Impact impact = 4;
+
+    enum Freshness {
+      IMMEDIATE = 0;
+      DAY = 1;
+      WEEK = 2;
+      EVENTUALLY = 3;
+      NEVER = 4;
+    }
+    Freshness freshness = 5;
+
+    bool inputs = 6;
+  }
+
+  message DataIntegrity {
+    int64 data_integrity_id = 1;
+    int64 dataset_collection_id = 2;
+    string data_integrity_rec_time = 3;
+    bool data_integrity_volat = 4;
+    string data_integrity_reg_time = 5;
+    string data_integrity_rest_time = 6;
+  }
+
+  repeated Collection collections = 1;
+  repeated DatasetCollection dataset_collections = 2;
+  repeated SystemCollection system_collections = 3;
+  repeated Dataset datasets = 4;
+  repeated System systems = 5;
+  repeated DataIntegrity data_integrities = 6;
+  repeated Processing processings = 7;
+}

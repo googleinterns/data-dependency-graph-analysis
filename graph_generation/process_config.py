@@ -4,14 +4,14 @@ It saves config to variables, and converts map strings to python dictionaries.
 """
 
 import yaml
-from connection_generator import ConnectionGenerator
+from graph_generation.connection_generator import ConnectionGenerator
 
-from config_params.collection_params import CollectionParams
-from config_params.data_integrity_params import DataIntegrityParams
-from config_params.dataset_params import DatasetParams
-from config_params.dataset_to_system_params import DatasetToSystemParams
-from config_params.processing_params import ProcessingParams
-from config_params.system_params import SystemParams
+from graph_generation.config_params.collection_params import CollectionParams
+from graph_generation.config_params.data_integrity_params import DataIntegrityParams
+from graph_generation.config_params.dataset_params import DatasetParams
+from graph_generation.config_params.dataset_to_system_params import DatasetToSystemParams
+from graph_generation.config_params.processing_params import ProcessingParams
+from graph_generation.config_params.system_params import SystemParams
 
 
 def process_map(config_map, proba=False, enum=False):

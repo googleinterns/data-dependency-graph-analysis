@@ -3,6 +3,7 @@ This module implements methods for data dependency mapping graph creation
 in a neo4j database.
 
 It allows to create nodes of type:
+    collection
     dataset collection
     system collection
     dataset
@@ -12,6 +13,8 @@ It allows to create nodes of type:
     data integrity
 
 While creating the nodes, the following two way connections will be created:
+    dataset collection - collection
+    system collection - collection
     dataset - dataset collection
     system - system collection
     system - dataset processing
@@ -79,7 +82,41 @@ class Neo4jGraph:
         """Closes the driver object."""
         self.driver.close()
 
-    def generate_dataset_collection(self, dataset_collection_id):
+    def generate_collection(self, collection_id):
+        """Generates a collection node with id and description based on the id.
+        Creating a collection node with id 1 will create a node with these attributes:
+            collection_id: 1,
+            description: Collection number 1.
+
+        Args:
+            collection_id: Dataset collection id, is unique and integer.
+
+        Raises:
+            ServiceUnavailable: Web socket error that occurs when having problems connecting to neo4j.
+        """
+        with self.driver.session() as session:
+            try:
+                generated_id = session.write_transaction(self._generate_collection, collection_id)
+                logging.info(f"Generated collection {generated_id}.")
+
+            except ServiceUnavailable as exception:
+                logging.error(exception)
+                raise
+
+    @staticmethod
+    def _generate_collection(tx, collection_id):
+        """Creates and runs a query for dataset collection creation."""
+        query = (
+            f'MERGE (collection:collection {{collection_id: {collection_id}, '
+            f'description: "Collection number {collection_id}"}}) '
+            f'RETURN collection'
+        )
+
+        query_output = tx.run(query)  # Returns an iterative with one collection
+        logging.info(f"Run cypher query to generate collection: {query}.")
+        return next(iter(query_output))["collection"]["collection_id"]
+
+    def generate_dataset_collection(self, dataset_collection_id, collection_id):
         """Generates a dataset collection node with id and description based on the id.
         Creating a dataset collection node with id 1 will create a node with these attributes:
             dataset_collection_id: 1,
@@ -87,13 +124,15 @@ class Neo4jGraph:
 
         Args:
             dataset_collection_id: Dataset collection id, is unique and integer.
+            collection_id: Collection id, is unique and integer.
 
         Raises:
             ServiceUnavailable: Web socket error that occurs when having problems connecting to neo4j.
         """
         with self.driver.session() as session:
             try:
-                generated_id = session.write_transaction(self._generate_dataset_collection, dataset_collection_id)
+                generated_id = session.write_transaction(self._generate_dataset_collection, dataset_collection_id,
+                                                         collection_id)
                 logging.info(f"Generated dataset collection {generated_id}.")
 
             except ServiceUnavailable as exception:
@@ -101,11 +140,14 @@ class Neo4jGraph:
                 raise
 
     @staticmethod
-    def _generate_dataset_collection(tx, dataset_collection_id):
+    def _generate_dataset_collection(tx, dataset_collection_id, collection_id):
         """Creates and runs a query for dataset collection creation."""
         query = (
+            f'MATCH (collection:collection) '
+            f'WHERE collection.collection_id = {collection_id} '
             f'MERGE (dataset_collection:dataset_collection {{dataset_collection_id: {dataset_collection_id}, '
             f'description: "Dataset collection number {dataset_collection_id}"}}) '
+            f'MERGE (collection) -[:CONTAINS] -> (dataset_collection) '
             f'RETURN dataset_collection'
         )
 
@@ -113,7 +155,7 @@ class Neo4jGraph:
         logging.info(f"Run cypher query to generate dataset collection: {query}.")
         return next(iter(query_output))["dataset_collection"]["dataset_collection_id"]
 
-    def generate_system_collection(self, system_collection_id):
+    def generate_system_collection(self, system_collection_id, collection_id):
         """Generates a system collection node with id and description based on the id.
         Creating a system collection with id 1 will create a node with these attributes:
             system_collection_id: 1,
@@ -121,13 +163,15 @@ class Neo4jGraph:
 
         Args:
             system_collection_id: System collection id, is unique and integer.
+            collection_id: Collection id, is unique and integer.
 
         Raises:
             ServiceUnavailable: Web socket error that occurs when having problems connecting to neo4j.
         """
         with self.driver.session() as session:
             try:
-                generated_id = session.write_transaction(self._generate_system_collection, system_collection_id)
+                generated_id = session.write_transaction(self._generate_system_collection, system_collection_id,
+                                                         collection_id)
                 logging.info(f"Generated system collection {generated_id}")
 
             except ServiceUnavailable as exception:
@@ -135,11 +179,14 @@ class Neo4jGraph:
                 raise
 
     @staticmethod
-    def _generate_system_collection(tx, system_collection_id):
+    def _generate_system_collection(tx, system_collection_id, collection_id):
         """Creates and runs a query for system collection creation."""
         query = (
+            f'MATCH (collection:collection) '
+            f'WHERE collection.collection_id = {collection_id} '
             f'MERGE (system_collection:system_collection {{system_collection_id: {system_collection_id}, '
             f'description: "System collection number {system_collection_id}"}}) '
+            f'MERGE (collection) -[:CONTAINS] -> (system_collection) '
             f'RETURN system_collection'
         )
 
@@ -387,3 +434,9 @@ class Neo4jGraph:
         logging.info(f"Run cypher query to generate data integrity: {query}.")
         return [{"dataset": row["dataset"]["dataset_id"],
                  "data_integrity": row["data_integrity"]["data_integrity_id"]} for row in query_output]
+
+    def save_to_file(self):
+        pass
+
+    def read_from_file(self):
+        pass
