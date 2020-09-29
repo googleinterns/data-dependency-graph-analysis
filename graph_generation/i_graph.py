@@ -203,7 +203,8 @@ class IGraph:
         self.vertex_attributes["data_integrity_rec_time"].append(data_integrity_rec_time)
         self.vertex_attributes["data_integrity_rest_time"].append(data_integrity_rest_time)
         self.vertex_attributes["data_integrity_reg_time"].append(data_integrity_reg_time)
-        self.vertex_attributes["data_integrity_volat"].append(data_integrity_volat)
+        # IGraph wouldn't save boolean values, so represent them as integer.
+        self.vertex_attributes["data_integrity_volat"].append(int(data_integrity_volat))
 
         for att in self.attribute_names:
             if att not in data_integrity_attributes:
@@ -230,7 +231,7 @@ class IGraph:
             os.remove(filename)
         elif os.path.isfile(filename):
             raise ValueError("Graph database with this file already exists.")
-        self.graph.save(filename)
+        self.graph.write_graphml(filename)
         logging.info(f"IGraph saved to {filename}.")
 
     def read_from_file(self, filename, overwrite=False):
@@ -240,7 +241,7 @@ class IGraph:
             ValueError: Graph attribute is not empty.
         """
         if self.graph.vcount() == 0 or overwrite:
-            self.graph = load(filename)
+            self.graph = self.graph.Read_GraphML(filename)
         else:
             raise ValueError("Graph is not empty. Use overwrite arg if this is intended.")
         logging.info(f"IGraph loaded from {filename}.")

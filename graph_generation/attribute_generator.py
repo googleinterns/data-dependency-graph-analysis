@@ -77,12 +77,14 @@ class AttributeGenerator:
     @staticmethod
     def generate_time(seconds_range, n=1):
         """Generates n random time strings in given seconds range in format '1d 2h 10m 46s'"""
-        total_seconds = [random.randint(seconds_range[0], seconds_range[1]) for _ in range(n)]
-        seconds = [i % 60 for i in total_seconds]
-        minutes = [i // 60 for i in total_seconds]
-        hours = [i // 60 for i in minutes]
-        days = [i // 24 for i in hours]
-        return [f"{days[i]}d {hours[i]}h {minutes[i]}m {seconds[i]}s" for i in range(n)]
+        generated_time = []
+        for i in range(n):
+            total_seconds = random.randint(seconds_range[0], seconds_range[1])
+            minutes, seconds = divmod(total_seconds, 60)
+            hours, minutes = divmod(minutes, 60)
+            days, hours = divmod(hours, 24)
+            generated_time.append(f"{days}d {hours}h {minutes}m {seconds}s")
+        return generated_time
 
     @staticmethod
     def generate_from_proba(proba_map, n=1):
