@@ -36,19 +36,19 @@ class NxGraph:
     ...
 
     Methods:
-        generate_collection(collection_id)
+        generate_collection(collection_id, name)
             Generates a collection with the given id.
 
-        generate_dataset_collection(dataset_collection_id, collection_id)
+        generate_dataset_collection(dataset_collection_id, collection_id, name)
             Generates a dataset collection with a given id.
 
-        generate_system_collection(system_collection_id, collection_id)
+        generate_system_collection(system_collection_id, collection_id, name)
             Generates a system collection with a given id.
 
-        generate_dataset(dataset_id, dataset_collection_id, slo)
+        generate_dataset(dataset_id, dataset_collection_id, regex_grouping, name, slo, env, description)
             Generates a dataset with a given id.
 
-        generate_system(system_id, system_collection_id, system_critic)
+        generate_system(system_id, system_critic, system_collection_id, regex_grouping, name, env, description)
             Generates a system with a given id.
 
         generate_processing(system_id, dataset_id, processing_id, impact, freshness, action="INPUTS")
@@ -77,59 +77,65 @@ class NxGraph:
                            "data_integrity_to_dataset_collection": "HAS"}
         self.edges = {edge: [] for edge in self.edge_types}
 
-    def generate_collection(self, collection_id):
+    def generate_collection(self, collection_id, name):
         """Generates collection node."""
-        node_attributes = {"id": collection_id, "description": f"Collection number {collection_id}."}
+        node_attributes = {"id": collection_id,
+                           "node_name": name,
+                           "type": "collection"}
         node = (f"collection_{collection_id}", node_attributes)
         self.nodes.append(node)
         logging.info(f"NxGraph. Added collection {collection_id}.")
 
-    def generate_dataset_collection(self, dataset_collection_id, collection_id):
+    def generate_dataset_collection(self, dataset_collection_id, collection_id, name):
         """Generates dataset collection node and dataset collection - collection edge."""
         node_attributes = {"id": dataset_collection_id,
                            "collection_id": collection_id,
-                           "description": f"Dataset collection number {dataset_collection_id}."}
+                           "node_name": name,
+                           "type": "dataset_collection"}
         node = (f"dataset_collection_{dataset_collection_id}", node_attributes)
         self.nodes.append(node)
         self.edges["dataset_collection_to_collection"].append((f"collection_{collection_id}",
                                                                f"dataset_collection_{dataset_collection_id}"))
         logging.info(f"NxGraph. Added dataset collection {dataset_collection_id}.")
 
-    def generate_system_collection(self, system_collection_id, collection_id):
+    def generate_system_collection(self, system_collection_id, collection_id, name):
         """Generates system collection node and system collection - collection edge."""
         node_attributes = {"id": system_collection_id,
                            "collection_id": collection_id,
-                           "description": f"System collection number {system_collection_id}."}
+                           "node_name": name,
+                           "type": "system_collection"}
         node = (f"system_collection_{system_collection_id}", node_attributes)
         self.nodes.append(node)
         self.edges["system_collection_to_collection"].append((f"collection_{collection_id}",
                                                               f"system_collection_{system_collection_id}"))
         logging.info(f"NxGraph. Added system collection {system_collection_id}.")
 
-    def generate_dataset(self, dataset_id, dataset_collection_id, slo, env):
+    def generate_dataset(self, dataset_id, dataset_collection_id, regex_grouping, name, slo, env, description):
         """Generates dataset node and dataset - dataset collection edge."""
         node_attributes = {"id": dataset_id,
                            "dataset_collection_id": dataset_collection_id,
-                           "regex_grouping": f"data.{dataset_id}.*",
-                           "node_name": f"dataset.{dataset_id}",
-                           "description": f"Dataset number {dataset_id}",
+                           "regex_grouping": regex_grouping,
+                           "node_name": name,
+                           "description": description,
                            "slo": slo,
-                           "env": env}
+                           "env": env,
+                           "type": "dataset"}
         node = (f"dataset_{dataset_id}", node_attributes)
         self.nodes.append(node)
         self.edges["dataset_to_dataset_collection"].append((f"dataset_collection_{dataset_collection_id}",
                                                             f"dataset_{dataset_id}"))
         logging.info(f"NxGraph. Added dataset {dataset_id}.")
 
-    def generate_system(self, system_id, system_critic, system_collection_id, env):
+    def generate_system(self, system_id, system_critic, system_collection_id, regex_grouping, name, env, description):
         """Generates system node and system - system collection edge."""
         node_attributes = {"id": system_id,
                            "system_collection_id": system_collection_id,
-                           "regex_grouping": f"system.{system_id}.*",
-                           "node_name": f"system.{system_id}",
-                           "description": f"System number {system_id}",
+                           "regex_grouping": regex_grouping,
+                           "node_name": name,
+                           "description": description,
                            "system_critic": system_critic,
-                           "env": env}
+                           "env": env,
+                           "type": "system"}
 
         node = (f"system_{system_id}", node_attributes)
         self.nodes.append(node)
@@ -141,7 +147,8 @@ class NxGraph:
         """Generates processing node and processing - dataset, processing - system edges."""
         node_attributes = {"id": processing_id,
                            "impact": impact,
-                           "freshness": freshness}
+                           "freshness": freshness,
+                           "type": "processing"}
         node = (f"processing_{processing_id}", node_attributes)
         self.nodes.append(node)
 
@@ -161,7 +168,8 @@ class NxGraph:
                            "data_integrity_rec_time": data_integrity_rec_time,
                            "data_integrity_rest_time": data_integrity_rest_time,
                            "data_integrity_reg_time": data_integrity_reg_time,
-                           "data_integrity_volat": int(data_integrity_volat)}
+                           "data_integrity_volat": int(data_integrity_volat),
+                           "type": "data_integrity"}
         node = (f"data_integrity_{data_integrity_id}", node_attributes)
         self.nodes.append(node)
         self.edges["data_integrity_to_dataset_collection"].append((f"dataset_collection_{dataset_collection_id}",

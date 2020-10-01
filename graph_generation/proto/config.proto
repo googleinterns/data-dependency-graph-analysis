@@ -3,16 +3,19 @@ syntax = "proto3";
 message ProtoGraph{
   message Collection {
       int64 collection_id = 1;
+      string name = 2;
   }
 
   message DatasetCollection {
     int64 dataset_collection_id = 1;
     int64 collection_id = 2;
+    string name = 3;
   }
 
   message SystemCollection {
     int64 system_collection_id = 1;
     int64 collection_id = 2;
+    string name = 3;
   }
 
   enum Env {
@@ -29,6 +32,9 @@ message ProtoGraph{
     int64 dataset_collection_id = 2;
     string slo = 3;
     Env dataset_env = 4;
+    string description = 5;
+    string regex_grouping = 6;
+    string name = 7;
   }
 
   message System {
@@ -42,6 +48,9 @@ message ProtoGraph{
     }
     SystemCriticality system_critic = 3;
     Env system_env = 4;
+    string description = 5;
+    string regex_grouping = 6;
+    string name = 7;
   }
 
   message Processing {

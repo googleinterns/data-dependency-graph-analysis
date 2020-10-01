@@ -24,19 +24,19 @@ class ProtoGraph:
     ...
 
     Methods:
-        generate_collection(collection_id)
+        generate_collection(collection_id, name)
             Generates a collection with the given id.
 
-        generate_dataset_collection(dataset_collection_id, collection_id)
+        generate_dataset_collection(dataset_collection_id, collection_id, name)
             Generates a dataset collection with a given id.
 
-        generate_system_collection(system_collection_id, collection_id)
+        generate_system_collection(system_collection_id, collection_id, name)
             Generates a system collection with a given id.
 
-        generate_dataset(dataset_id, dataset_collection_id, slo)
+        generate_dataset(dataset_id, dataset_collection_id, regex_grouping, name, slo, env, description)
             Generates a dataset with a given id.
 
-        generate_system(system_id, system_collection_id, system_critic)
+        generate_system(system_id, system_critic, system_collection_id, regex_grouping, name, env, description)
             Generates a system with a given id.
 
         generate_processing(system_id, dataset_id, processing_id, impact, freshness, action="INPUTS")
@@ -121,43 +121,52 @@ class ProtoGraph:
             logging.error("Incorrect processing freshness value. Setting NEVER as a default.")
             return freshness_dict["NEVER"]
 
-    def generate_collection(self, collection_id):
+    def generate_collection(self, collection_id, name):
         """Generates collection message."""
         self.is_empty = False
         collection = self.graph.collections.add()
         collection.collection_id = collection_id
+        collection.name = name
         logging.info(f"Proto graph. Added collection {collection_id}.")
 
-    def generate_dataset_collection(self, dataset_collection_id, collection_id):
+    def generate_dataset_collection(self, dataset_collection_id, collection_id, name):
         """Generates dataset collection message."""
         dataset_collection = self.graph.dataset_collections.add()
         dataset_collection.dataset_collection_id = dataset_collection_id
         dataset_collection.collection_id = collection_id
+        dataset_collection.name = name
         logging.info(f"Proto graph. Added dataset collection {dataset_collection_id}.")
 
-    def generate_system_collection(self, system_collection_id, collection_id):
+    def generate_system_collection(self, system_collection_id, collection_id, name):
         """Generates system collection message."""
         system_collection = self.graph.system_collections.add()
         system_collection.system_collection_id = system_collection_id
         system_collection.collection_id = collection_id
+        system_collection.name = name
         logging.info(f"Proto graph. Added system collection {system_collection_id}.")
 
-    def generate_dataset(self, dataset_id, dataset_collection_id, slo, env):
+    def generate_dataset(self, dataset_id, dataset_collection_id, regex_grouping, name, slo, env, description):
         """Generates dataset message."""
         dataset = self.graph.datasets.add()
         dataset.dataset_id = dataset_id
         dataset.dataset_collection_id = dataset_collection_id
         dataset.slo = slo
         dataset.dataset_env = self._get_env_enum(env)
+        dataset.regex_grouping = regex_grouping
+        dataset.name = name
+        dataset.description = description
         logging.info(f"Proto graph. Added dataset {dataset_id}.")
 
-    def generate_system(self, system_id, system_critic, system_collection_id, env):
+    def generate_system(self, system_id, system_critic, system_collection_id, regex_grouping, name, env, description):
         """Generate system message."""
         system = self.graph.systems.add()
         system.system_id = system_id
         system.system_collection_id = system_collection_id
         system.system_critic = self._get_system_criticality_enum(system_critic)
         system.system_env = self._get_env_enum(env)
+        system.regex_grouping = regex_grouping
+        system.name = name
+        system.description = description
         logging.info(f"Proto graph. Added system {system_id}.")
 
     def generate_processing(self, system_id, dataset_id, processing_id, impact, freshness, inputs=True):
