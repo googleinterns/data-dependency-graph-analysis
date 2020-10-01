@@ -121,28 +121,28 @@ class ProtoGraph:
             logging.error("Incorrect processing freshness value. Setting NEVER as a default.")
             return freshness_dict["NEVER"]
 
-    def generate_collection(self, collection_id, description):
+    def generate_collection(self, collection_id, name):
         """Generates collection message."""
         self.is_empty = False
         collection = self.graph.collections.add()
         collection.collection_id = collection_id
-        collection.description = description
+        collection.name = name
         logging.info(f"Proto graph. Added collection {collection_id}.")
 
-    def generate_dataset_collection(self, dataset_collection_id, collection_id, description):
+    def generate_dataset_collection(self, dataset_collection_id, collection_id, name):
         """Generates dataset collection message."""
         dataset_collection = self.graph.dataset_collections.add()
         dataset_collection.dataset_collection_id = dataset_collection_id
         dataset_collection.collection_id = collection_id
-        dataset_collection.description = description
+        dataset_collection.name = name
         logging.info(f"Proto graph. Added dataset collection {dataset_collection_id}.")
 
-    def generate_system_collection(self, system_collection_id, collection_id, description):
+    def generate_system_collection(self, system_collection_id, collection_id, name):
         """Generates system collection message."""
         system_collection = self.graph.system_collections.add()
         system_collection.system_collection_id = system_collection_id
         system_collection.collection_id = collection_id
-        system_collection.description = description
+        system_collection.name = name
         logging.info(f"Proto graph. Added system collection {system_collection_id}.")
 
     def generate_dataset(self, dataset_id, dataset_collection_id, regex_grouping, name, slo, env, description):

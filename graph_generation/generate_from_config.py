@@ -129,24 +129,24 @@ def generate_nodes_and_edges(graph, collection_params, graph_connections, graph_
     # Generate collections.
     start = time.time()
     for collection_id in range(1, collection_params.collection_count + 1):
-        description = graph_attributes.collection_attributes["descriptions"][collection_id - 1]
-        graph.generate_collection(collection_id, description)
+        name = graph_attributes.collection_attributes["names"][collection_id - 1]
+        graph.generate_collection(collection_id, name)
     logging.info(f"Generated collections in {round(time.time() - start, 1)} seconds.")
 
     # Generate dataset collections.
     start = time.time()
     for collection_id in graph_connections.dataset_collections_conn_collection:
         for dataset_collection_id in graph_connections.dataset_collections_conn_collection[collection_id]:
-            description = graph_attributes.dataset_collection_attributes["descriptions"][dataset_collection_id - 1]
-            graph.generate_dataset_collection(dataset_collection_id, collection_id, description)
+            name = graph_attributes.dataset_collection_attributes["names"][dataset_collection_id - 1]
+            graph.generate_dataset_collection(dataset_collection_id, collection_id, name)
     logging.info(f"Generated dataset collections in {round(time.time() - start, 1)} seconds.")
 
     # Generate system collections.
     start = time.time()
     for collection_id in graph_connections.system_collections_conn_collection:
         for system_collection_id in graph_connections.system_collections_conn_collection[collection_id]:
-            description = graph_attributes.system_collection_attributes["descriptions"][system_collection_id - 1]
-            graph.generate_system_collection(system_collection_id, collection_id, description)
+            name = graph_attributes.system_collection_attributes["names"][system_collection_id - 1]
+            graph.generate_system_collection(system_collection_id, collection_id, name)
     logging.info(f"Generated system collections in {round(time.time() - start, 1)} seconds.")
 
     # Generate datasets.
@@ -218,18 +218,8 @@ def generate_nodes_and_edges(graph, collection_params, graph_connections, graph_
     logging.info(f"Generated dataset write connections in {round(time.time() - start, 1)} seconds.")
 
 
-if __name__ == '__main__':
-    # Parse command line arguments.
-    args = parse_args()
-    output_file = args.output_file
-    config_path = args.config_file
-    graph_type = args.graph_type
-    overwrite = args.overwrite
-
-    # Load config file.
-    with open(config_path, 'r') as f:
-        config = yaml.load(f, Loader=yaml.FullLoader)
-
+def generate_and_save_graph(config, graph_type, output_file):
+    """Generates graph of type proto or networkx from config and saves the file to the output_file."""
     # Get connection params.
     dataset_params, system_params, dataset_to_system_params, collection_params = get_connection_params(config)
 
@@ -264,3 +254,19 @@ if __name__ == '__main__':
     start = time.time()
     graph.save_to_file(output_file, overwrite=overwrite)
     logging.info(f"Finished generation and saved graph to file in {round(time.time() - start, 1)} seconds.")
+
+
+if __name__ == '__main__':
+    # Parse command line arguments.
+    args = parse_args()
+    output_file = args.output_file
+    config_path = args.config_file
+    graph_type = args.graph_type
+    overwrite = args.overwrite
+
+    # Load config file.
+    with open(config_path, 'r') as f:
+        config = yaml.load(f, Loader=yaml.FullLoader)
+
+    # Generate graph and save to output file.
+    generate_and_save_graph(config, graph_type, output_file)

@@ -77,20 +77,20 @@ class NxGraph:
                            "data_integrity_to_dataset_collection": "HAS"}
         self.edges = {edge: [] for edge in self.edge_types}
 
-    def generate_collection(self, collection_id, description):
+    def generate_collection(self, collection_id, name):
         """Generates collection node."""
         node_attributes = {"id": collection_id,
-                           "description": description,
+                           "node_name": name,
                            "type": "collection"}
         node = (f"collection_{collection_id}", node_attributes)
         self.nodes.append(node)
         logging.info(f"NxGraph. Added collection {collection_id}.")
 
-    def generate_dataset_collection(self, dataset_collection_id, collection_id, description):
+    def generate_dataset_collection(self, dataset_collection_id, collection_id, name):
         """Generates dataset collection node and dataset collection - collection edge."""
         node_attributes = {"id": dataset_collection_id,
                            "collection_id": collection_id,
-                           "description": description,
+                           "node_name": name,
                            "type": "dataset_collection"}
         node = (f"dataset_collection_{dataset_collection_id}", node_attributes)
         self.nodes.append(node)
@@ -98,11 +98,11 @@ class NxGraph:
                                                                f"dataset_collection_{dataset_collection_id}"))
         logging.info(f"NxGraph. Added dataset collection {dataset_collection_id}.")
 
-    def generate_system_collection(self, system_collection_id, collection_id, description):
+    def generate_system_collection(self, system_collection_id, collection_id, name):
         """Generates system collection node and system collection - collection edge."""
         node_attributes = {"id": system_collection_id,
                            "collection_id": collection_id,
-                           "description": description,
+                           "node_name": name,
                            "type": "system_collection"}
         node = (f"system_collection_{system_collection_id}", node_attributes)
         self.nodes.append(node)

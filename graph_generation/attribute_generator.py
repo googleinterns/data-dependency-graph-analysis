@@ -2,9 +2,9 @@
 This module implements methods for generating random attributes from nodes in a graph based on distribution and range.
 
 Method generate() will create all the necessary attributes for the graph:
-    Collection: description.
-    Dataset collection: description.
-    System collection: description.
+    Collection: name.
+    Dataset collection: name.
+    System collection: name.
     System: system criticality, environment, description, name, regex grouping.
     Dataset: slo, environment, description, name, regex grouping.
     Data integrity: reconstruction time, volatility, regeneration time, restoration time.
@@ -106,21 +106,21 @@ class AttributeGenerator:
         return f"{node_type}.{node_id}"
 
     def _generate_collection_attributes(self):
-        """Generates description for collections."""
-        collection_descriptions = [self._generate_description("collection", i) for i in range(self.collection_params.collection_count)]
-        self.collection_attributes["descriptions"] = collection_descriptions
+        """Generates name for collections."""
+        collection_names = [self._generate_name("collection", i) for i in range(self.collection_params.collection_count)]
+        self.collection_attributes["names"] = collection_names
 
     def _generate_dataset_collection_attributes(self):
-        """Generates description for dataset collections."""
-        dataset_collection_descriptions = [self._generate_description("dataset collection", i)
-                                           for i in range(self.collection_params.dataset_collection_count)]
-        self.dataset_collection_attributes["descriptions"] = dataset_collection_descriptions
+        """Generates name for dataset collections."""
+        dataset_collection_names = [self._generate_name("dataset collection", i)
+                                    for i in range(self.collection_params.dataset_collection_count)]
+        self.dataset_collection_attributes["names"] = dataset_collection_names
 
     def _generate_system_collection_attributes(self):
-        """Generates description for system collections."""
-        system_collection_descriptions = [self._generate_description("system collection", i)
-                                          for i in range(self.collection_params.system_collection_count)]
-        self.system_collection_attributes["descriptions"] = system_collection_descriptions
+        """Generates name for system collections."""
+        system_collection_names = [self._generate_name("system collection", i)
+                                   for i in range(self.collection_params.system_collection_count)]
+        self.system_collection_attributes["names"] = system_collection_names
 
     def _generate_dataset_attributes(self):
         """Generates slo, environments, regex groupings and names for datasets."""
