@@ -8,6 +8,11 @@ Usage:
          --config_file "graph_generation/configs/config_15_09_20.yaml" \
          --graph_type "networkx" \
          --overwrite
+
+    Parameters info:
+        output file for proto has .bin extension and output file for networkx graph has .graphml extension
+        graph_type could be one of "proto" / "networkx"
+        overwrite if not specified equals to False. If it is used (ex. above) - it will overwrite the existing graph.
 """
 
 import yaml
@@ -17,7 +22,8 @@ import argparse
 
 from connection_generator import ConnectionGenerator
 from attribute_generator import AttributeGenerator
-from graph_template import GraphTemplate
+from proto_graph import ProtoGraph
+from nx_graph import NxGraph
 
 from config_params.collection_params import CollectionParams
 from config_params.data_integrity_params import DataIntegrityParams
@@ -58,23 +64,14 @@ def parse_args():
     return args
 
 
-if __name__ == '__main__':
-    # Parse command line arguments.
-    args = parse_args()
-    output_file = args.output_file
-    config_path = args.config_file
-    graph_type = args.graph_type
-    overwrite = args.overwrite
-
-    # Load config file.
-    with open(config_path, 'r') as f:
-        config = yaml.load(f, Loader=yaml.FullLoader)
-
-    # Generate parameters.
+def get_connection_params(config):
+    """
+    Creates instances of DatasetParams, SystemParams, DatasetToSystemParams, and CollectionParams for connection
+    generation from config.
+    """
     dataset_params = DatasetParams(
         dataset_count=config["dataset"]["dataset_count"],
-        dataset_env_count_map=process_map(config["dataset"]["dataset_env_count_map"], enum=True),
-        dataset_slo_range=config["dataset"]["dataset_slo_range_seconds"]
+        dataset_env_count_map=process_map(config["dataset"]["dataset_env_count_map"], enum=True)
     )
 
     system_params = SystemParams(
@@ -100,6 +97,13 @@ if __name__ == '__main__':
         collection_count=config["collection"]["collection_count"]
     )
 
+    return dataset_params, system_params, dataset_to_system_params, collection_params
+
+
+def get_attribute_params(config, graph_connections):
+    """
+    Creates instances of ProcessingParams, DataIntegrityParams, ConnectionParams for attribute generation from config.
+    """
     processing_params = ProcessingParams(
         dataset_criticality_proba_map=process_map(config["data_processing"]["dataset_criticality_proba_map"],
                                                   proba=True, enum=True),
@@ -108,59 +112,42 @@ if __name__ == '__main__':
     )
 
     data_integrity_params = DataIntegrityParams(
-        data_restoration_range_seconds=config["data_integrity"]["restoration_range_seconds"],
-        data_regeneration_range_seconds=config["data_integrity"]["regeneration_range_seconds"],
-        data_reconstruction_range_seconds=config["data_integrity"]["reconstruction_range_seconds"],
         data_volatility_proba_map=process_map(config["data_integrity"]["volatality_proba_map"], proba=True)
     )
-
-    # Generate random connections between nodes.
-    graph_connections = ConnectionGenerator(
-        dataset_params=dataset_params,
-        system_params=system_params,
-        dataset_to_system_params=dataset_to_system_params,
-        collection_params=collection_params
-    )
-    graph_connections.generate()
-    logging.info(f"Successfully generated connections.")
 
     # Number of connections can not be predicted, so we need to get them for attribute generation.
     system_write_conn_count = sum([len(i) for i in graph_connections.dataset_write_conn_systems.values()])
     system_read_conn_count = sum([len(i) for i in graph_connections.dataset_read_conn_systems.values()])
     connection_params = ConnectionParams(system_write_conn_count, system_read_conn_count)
+    return processing_params, data_integrity_params, connection_params
 
-    # Generate attributes.
-    graph_attributes = AttributeGenerator(dataset_params, system_params, data_integrity_params, processing_params,
-                                          connection_params)
-    graph_attributes.generate()
-    logging.info(f"Successfully generated attributes.")
 
-    # Create a graph.
-    if graph_type == "proto":
-        graph = GraphTemplate().get_proto_graph()
-    else:
-        graph = GraphTemplate().get_nx_graph()
-    logging.info(f"Created empty {graph_type} graph.")
-
+def generate_nodes_and_edges(graph, collection_params, graph_connections, graph_attributes):
+    """
+    Generates nodes and edges of a graph based on generated connections, attributes, and graph dimensions in config.
+    """
     # Generate collections.
     start = time.time()
     for collection_id in range(1, collection_params.collection_count + 1):
-        graph.generate_collection(collection_id)
+        description = graph_attributes.collection_attributes["descriptions"][collection_id - 1]
+        graph.generate_collection(collection_id, description)
     logging.info(f"Generated collections in {round(time.time() - start, 1)} seconds.")
 
     # Generate dataset collections.
     start = time.time()
     for collection_id in graph_connections.dataset_collections_conn_collection:
         for dataset_collection_id in graph_connections.dataset_collections_conn_collection[collection_id]:
-            graph.generate_dataset_collection(dataset_collection_id, collection_id)
-    logging.info(f"Generate dataset collections in {round(time.time() - start, 1)} seconds.")
+            description = graph_attributes.dataset_collection_attributes["descriptions"][dataset_collection_id - 1]
+            graph.generate_dataset_collection(dataset_collection_id, collection_id, description)
+    logging.info(f"Generated dataset collections in {round(time.time() - start, 1)} seconds.")
 
     # Generate system collections.
     start = time.time()
     for collection_id in graph_connections.system_collections_conn_collection:
         for system_collection_id in graph_connections.system_collections_conn_collection[collection_id]:
-            graph.generate_system_collection(system_collection_id, collection_id)
-    logging.info(f"Generate system collections in {round(time.time() - start, 1)} seconds.")
+            description = graph_attributes.system_collection_attributes["descriptions"][system_collection_id - 1]
+            graph.generate_system_collection(system_collection_id, collection_id, description)
+    logging.info(f"Generated system collections in {round(time.time() - start, 1)} seconds.")
 
     # Generate datasets.
     start = time.time()
@@ -169,8 +156,11 @@ if __name__ == '__main__':
             graph.generate_dataset(dataset_id=dataset_id,
                                    dataset_collection_id=dataset_collection_id,
                                    slo=graph_attributes.dataset_attributes["dataset_slos"][dataset_id - 1],
-                                   env=graph_attributes.dataset_attributes["dataset_environments"][dataset_id - 1])
-    logging.info(f"Generate datasets in {round(time.time() - start, 1)} seconds.")
+                                   env=graph_attributes.dataset_attributes["dataset_environments"][dataset_id - 1],
+                                   description=graph_attributes.dataset_attributes["descriptions"][dataset_id - 1],
+                                   regex_grouping=graph_attributes.dataset_attributes["regex_groupings"][dataset_id - 1],
+                                   name=graph_attributes.dataset_attributes["names"][dataset_id - 1])
+    logging.info(f"Generated datasets in {round(time.time() - start, 1)} seconds.")
 
     # Generate systems.
     start = time.time()
@@ -179,8 +169,11 @@ if __name__ == '__main__':
             graph.generate_system(system_id=system_id,
                                   system_collection_id=system_collection_id,
                                   system_critic=graph_attributes.system_attributes["system_criticalities"][system_id - 1],
-                                  env=graph_attributes.system_attributes["system_environments"][system_id - 1])
-    logging.info(f"Generate systems in {round(time.time() - start, 1)} seconds.")
+                                  env=graph_attributes.system_attributes["system_environments"][system_id - 1],
+                                  description=graph_attributes.system_attributes["descriptions"][system_id - 1],
+                                  regex_grouping=graph_attributes.system_attributes["regex_groupings"][system_id - 1],
+                                  name=graph_attributes.system_attributes["names"][system_id - 1])
+    logging.info(f"Generated systems in {round(time.time() - start, 1)} seconds.")
 
     # Generate data integrity.
     start = time.time()
@@ -195,7 +188,7 @@ if __name__ == '__main__':
                                       data_integrity_reg_time=regeneration_time,
                                       data_integrity_rest_time=reconstruction_time,
                                       data_integrity_volat=volatility)
-    logging.info(f"Generate data integrity in {round(time.time() - start, 1)} seconds.")
+    logging.info(f"Generated data integrity in {round(time.time() - start, 1)} seconds.")
 
     # Generate connections between dataset read and system input
     start = time.time()
@@ -209,7 +202,7 @@ if __name__ == '__main__':
                                       freshness=graph_attributes.dataset_processing_attributes["dataset_freshness"][processing_id - 1],
                                       inputs=True)
             processing_id += 1
-    logging.info(f"Generate dataset read connections in {round(time.time() - start, 1)} seconds.")
+    logging.info(f"Generated dataset read connections in {round(time.time() - start, 1)} seconds.")
 
     # Generate connections between system output and dataset write.
     start = time.time()
@@ -222,7 +215,50 @@ if __name__ == '__main__':
                                       freshness=graph_attributes.dataset_processing_attributes["dataset_freshness"][processing_id - 1],
                                       inputs=False)
             processing_id += 1
-    logging.info(f"Generate dataset write connections in {round(time.time() - start, 1)} seconds.")
+    logging.info(f"Generated dataset write connections in {round(time.time() - start, 1)} seconds.")
+
+
+if __name__ == '__main__':
+    # Parse command line arguments.
+    args = parse_args()
+    output_file = args.output_file
+    config_path = args.config_file
+    graph_type = args.graph_type
+    overwrite = args.overwrite
+
+    # Load config file.
+    with open(config_path, 'r') as f:
+        config = yaml.load(f, Loader=yaml.FullLoader)
+
+    # Get connection params.
+    dataset_params, system_params, dataset_to_system_params, collection_params = get_connection_params(config)
+
+    # Generate random connections between nodes.
+    graph_connections = ConnectionGenerator(
+        dataset_params=dataset_params,
+        system_params=system_params,
+        dataset_to_system_params=dataset_to_system_params,
+        collection_params=collection_params
+    )
+    graph_connections.generate()
+    logging.info(f"Successfully generated connections.")
+
+    # Get attribute params.
+    processing_params, data_integrity_params, connection_params = get_attribute_params(config, graph_connections)
+    graph_attributes = AttributeGenerator(collection_params, dataset_params, system_params, data_integrity_params,
+                                          processing_params, connection_params)
+    graph_attributes.generate()
+    logging.info(f"Successfully generated attributes.")
+
+    # Create a graph.
+    if graph_type == "proto":
+        graph = ProtoGraph()
+    else:
+        graph = NxGraph()
+    logging.info(f"Created empty {graph_type} graph.")
+
+    # Add nodes and edges from generated attributes and connections
+    generate_nodes_and_edges(graph, collection_params, graph_connections, graph_attributes)
 
     # Save graph to file.
     start = time.time()
