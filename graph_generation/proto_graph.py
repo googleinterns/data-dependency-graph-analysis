@@ -75,6 +75,10 @@ class ProtoGraph:
             return env_dict["UNKNOWN_ENV"]
 
     @staticmethod
+    def env_enum_to_string(env):
+        return config_pb2.ProtoGraph.Env.Name(env)
+
+    @staticmethod
     def _get_system_criticality_enum(system_criticality):
         """Returns system criticality enum from proto config."""
         system_criticality_dict = {
@@ -88,6 +92,10 @@ class ProtoGraph:
         else:
             logging.error("Incorrect system criticality value. Setting NEVER as a default.")
             return system_criticality_dict["CRITICAL_OTHER"]
+
+    @staticmethod
+    def criticality_enum_to_string(system_criticality):
+        return config_pb2.ProtoGraph.System.SystemCriticality.Name(system_criticality)
 
     @staticmethod
     def _get_processing_impact_enum(impact):
@@ -106,6 +114,10 @@ class ProtoGraph:
             return impact_dict["NONE"]
 
     @staticmethod
+    def processing_impact_enum_to_string(impact):
+        return config_pb2.ProtoGraph.Processing.Impact.Name(impact)
+
+    @staticmethod
     def _get_processing_freshness_enum(freshness):
         """Returns processing freshness enum from proto config"""
         freshness_dict = {
@@ -120,6 +132,10 @@ class ProtoGraph:
         else:
             logging.error("Incorrect processing freshness value. Setting NEVER as a default.")
             return freshness_dict["NEVER"]
+
+    @staticmethod
+    def processing_freshness_enum_to_string(freshness):
+        return config_pb2.ProtoGraph.Processing.Freshness.Name(freshness)
 
     def generate_collection(self, collection_id, name):
         """Generates collection message."""
