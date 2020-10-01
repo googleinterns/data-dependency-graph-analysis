@@ -36,19 +36,19 @@ class NxGraph:
     ...
 
     Methods:
-        generate_collection(collection_id)
+        generate_collection(collection_id, name)
             Generates a collection with the given id.
 
-        generate_dataset_collection(dataset_collection_id, collection_id)
+        generate_dataset_collection(dataset_collection_id, collection_id, name)
             Generates a dataset collection with a given id.
 
-        generate_system_collection(system_collection_id, collection_id)
+        generate_system_collection(system_collection_id, collection_id, name)
             Generates a system collection with a given id.
 
-        generate_dataset(dataset_id, dataset_collection_id, slo)
+        generate_dataset(dataset_id, dataset_collection_id, regex_grouping, name, slo, env, description)
             Generates a dataset with a given id.
 
-        generate_system(system_id, system_collection_id, system_critic)
+        generate_system(system_id, system_critic, system_collection_id, regex_grouping, name, env, description)
             Generates a system with a given id.
 
         generate_processing(system_id, dataset_id, processing_id, impact, freshness, action="INPUTS")

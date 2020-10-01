@@ -24,13 +24,13 @@ class ProtoGraph:
     ...
 
     Methods:
-        generate_collection(collection_id, description)
+        generate_collection(collection_id, name)
             Generates a collection with the given id.
 
-        generate_dataset_collection(dataset_collection_id, collection_id, description)
+        generate_dataset_collection(dataset_collection_id, collection_id, name)
             Generates a dataset collection with a given id.
 
-        generate_system_collection(system_collection_id, collection_id, description)
+        generate_system_collection(system_collection_id, collection_id, name)
             Generates a system collection with a given id.
 
         generate_dataset(dataset_id, dataset_collection_id, regex_grouping, name, slo, env, description)
