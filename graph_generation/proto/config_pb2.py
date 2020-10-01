@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n#graph_generation/proto/config.proto\"\xed\r\n\nProtoGraph\x12+\n\x0b\x63ollections\x18\x01 \x03(\x0b\x32\x16.ProtoGraph.Collection\x12:\n\x13\x64\x61taset_collections\x18\x02 \x03(\x0b\x32\x1d.ProtoGraph.DatasetCollection\x12\x38\n\x12system_collections\x18\x03 \x03(\x0b\x32\x1c.ProtoGraph.SystemCollection\x12%\n\x08\x64\x61tasets\x18\x04 \x03(\x0b\x32\x13.ProtoGraph.Dataset\x12#\n\x07systems\x18\x05 \x03(\x0b\x32\x12.ProtoGraph.System\x12\x33\n\x10\x64\x61ta_integrities\x18\x06 \x03(\x0b\x32\x19.ProtoGraph.DataIntegrity\x12+\n\x0bprocessings\x18\x07 \x03(\x0b\x32\x16.ProtoGraph.Processing\x1a\x31\n\nCollection\x12\x15\n\rcollection_id\x18\x01 \x01(\x03\x12\x0c\n\x04name\x18\x02 \x01(\t\x1aW\n\x11\x44\x61tasetCollection\x12\x1d\n\x15\x64\x61taset_collection_id\x18\x01 \x01(\x03\x12\x15\n\rcollection_id\x18\x02 \x01(\x03\x12\x0c\n\x04name\x18\x03 \x01(\t\x1aU\n\x10SystemCollection\x12\x1c\n\x14system_collection_id\x18\x01 \x01(\x03\x12\x15\n\rcollection_id\x18\x02 \x01(\x03\x12\x0c\n\x04name\x18\x03 \x01(\t\x1a\xaa\x01\n\x07\x44\x61taset\x12\x12\n\ndataset_id\x18\x01 \x01(\x03\x12\x1d\n\x15\x64\x61taset_collection_id\x18\x02 \x01(\x03\x12\x0b\n\x03slo\x18\x03 \x01(\t\x12$\n\x0b\x64\x61taset_env\x18\x04 \x01(\x0e\x32\x0f.ProtoGraph.Env\x12\x13\n\x0b\x64\x65scription\x18\x05 \x01(\t\x12\x16\n\x0eregex_grouping\x18\x06 \x01(\t\x12\x0c\n\x04name\x18\x07 \x01(\t\x1a\xd6\x02\n\x06System\x12\x11\n\tsystem_id\x18\x01 \x01(\x03\x12\x1c\n\x14system_collection_id\x18\x02 \x01(\x03\x12;\n\rsystem_critic\x18\x03 \x01(\x0e\x32$.ProtoGraph.System.SystemCriticality\x12#\n\nsystem_env\x18\x04 \x01(\x0e\x32\x0f.ProtoGraph.Env\x12\x13\n\x0b\x64\x65scription\x18\x05 \x01(\t\x12\x16\n\x0eregex_grouping\x18\x06 \x01(\t\x12\x0c\n\x04name\x18\x07 \x01(\t\"~\n\x11SystemCriticality\x12\x10\n\x0cNOT_CRITICAL\x10\x00\x12 \n\x1c\x43RITICAL_CAN_CAUSE_S0_OUTAGE\x10\x01\x12!\n\x1d\x43RITICAL_SIGNIFICANT_RUN_RATE\x10\x02\x12\x12\n\x0e\x43RITICAL_OTHER\x10\x03\x1a\xe1\x02\n\nProcessing\x12\x11\n\tsystem_id\x18\x01 \x01(\x03\x12\x12\n\ndataset_id\x18\x02 \x01(\x03\x12\x15\n\rprocessing_id\x18\x03 \x01(\x03\x12-\n\x06impact\x18\x04 \x01(\x0e\x32\x1d.ProtoGraph.Processing.Impact\x12\x33\n\tfreshness\x18\x05 \x01(\x0e\x32 .ProtoGraph.Processing.Freshness\x12\x0e\n\x06inputs\x18\x06 \x01(\x08\"W\n\x06Impact\x12\x08\n\x04\x44OWN\x10\x00\x12\x15\n\x11SEVERELY_DEGRADED\x10\x01\x12\x0c\n\x08\x44\x45GRADED\x10\x02\x12\x14\n\x10OPPORTUNITY_LOSS\x10\x03\x12\x08\n\x04NONE\x10\x04\"H\n\tFreshness\x12\r\n\tIMMEDIATE\x10\x00\x12\x07\n\x03\x44\x41Y\x10\x01\x12\x08\n\x04WEEK\x10\x02\x12\x0e\n\nEVENTUALLY\x10\x03\x12\t\n\x05NEVER\x10\x04\x1a\xcb\x01\n\rDataIntegrity\x12\x19\n\x11\x64\x61ta_integrity_id\x18\x01 \x01(\x03\x12\x1d\n\x15\x64\x61taset_collection_id\x18\x02 \x01(\x03\x12\x1f\n\x17\x64\x61ta_integrity_rec_time\x18\x03 \x01(\t\x12\x1c\n\x14\x64\x61ta_integrity_volat\x18\x04 \x01(\x08\x12\x1f\n\x17\x64\x61ta_integrity_reg_time\x18\x05 \x01(\t\x12 \n\x18\x64\x61ta_integrity_rest_time\x18\x06 \x01(\t\"s\n\x03\x45nv\x12\x13\n\x0f\x44\x45VELOPMENT_ENV\x10\x00\x12\x10\n\x0cPERSONAL_ENV\x10\x01\x12\x12\n\x0ePRODUCTION_ENV\x10\x02\x12\x0f\n\x0bSTAGING_ENV\x10\x03\x12\x0f\n\x0bTESTING_ENV\x10\x04\x12\x0f\n\x0bUNKNOWN_ENV\x10\x05\x62\x06proto3'
+  serialized_pb=b'\n#graph_generation/proto/config.proto\"\xde\r\n\nProtoGraph\x12+\n\x0b\x63ollections\x18\x01 \x03(\x0b\x32\x16.ProtoGraph.Collection\x12:\n\x13\x64\x61taset_collections\x18\x02 \x03(\x0b\x32\x1d.ProtoGraph.DatasetCollection\x12\x38\n\x12system_collections\x18\x03 \x03(\x0b\x32\x1c.ProtoGraph.SystemCollection\x12%\n\x08\x64\x61tasets\x18\x04 \x03(\x0b\x32\x13.ProtoGraph.Dataset\x12#\n\x07systems\x18\x05 \x03(\x0b\x32\x12.ProtoGraph.System\x12\x33\n\x10\x64\x61ta_integrities\x18\x06 \x03(\x0b\x32\x19.ProtoGraph.DataIntegrity\x12+\n\x0bprocessings\x18\x07 \x03(\x0b\x32\x16.ProtoGraph.Processing\x1a\x31\n\nCollection\x12\x15\n\rcollection_id\x18\x01 \x01(\x03\x12\x0c\n\x04name\x18\x02 \x01(\t\x1aW\n\x11\x44\x61tasetCollection\x12\x1d\n\x15\x64\x61taset_collection_id\x18\x01 \x01(\x03\x12\x15\n\rcollection_id\x18\x02 \x01(\x03\x12\x0c\n\x04name\x18\x03 \x01(\t\x1aU\n\x10SystemCollection\x12\x1c\n\x14system_collection_id\x18\x01 \x01(\x03\x12\x15\n\rcollection_id\x18\x02 \x01(\x03\x12\x0c\n\x04name\x18\x03 \x01(\t\x1a\xa2\x01\n\x07\x44\x61taset\x12\x12\n\ndataset_id\x18\x01 \x01(\x03\x12\x1d\n\x15\x64\x61taset_collection_id\x18\x02 \x01(\x03\x12\x0b\n\x03slo\x18\x03 \x01(\t\x12\x1c\n\x03\x65nv\x18\x04 \x01(\x0e\x32\x0f.ProtoGraph.Env\x12\x13\n\x0b\x64\x65scription\x18\x05 \x01(\t\x12\x16\n\x0eregex_grouping\x18\x06 \x01(\t\x12\x0c\n\x04name\x18\x07 \x01(\t\x1a\xcf\x02\n\x06System\x12\x11\n\tsystem_id\x18\x01 \x01(\x03\x12\x1c\n\x14system_collection_id\x18\x02 \x01(\x03\x12;\n\rsystem_critic\x18\x03 \x01(\x0e\x32$.ProtoGraph.System.SystemCriticality\x12\x1c\n\x03\x65nv\x18\x04 \x01(\x0e\x32\x0f.ProtoGraph.Env\x12\x13\n\x0b\x64\x65scription\x18\x05 \x01(\t\x12\x16\n\x0eregex_grouping\x18\x06 \x01(\t\x12\x0c\n\x04name\x18\x07 \x01(\t\"~\n\x11SystemCriticality\x12\x10\n\x0cNOT_CRITICAL\x10\x00\x12 \n\x1c\x43RITICAL_CAN_CAUSE_S0_OUTAGE\x10\x01\x12!\n\x1d\x43RITICAL_SIGNIFICANT_RUN_RATE\x10\x02\x12\x12\n\x0e\x43RITICAL_OTHER\x10\x03\x1a\xe1\x02\n\nProcessing\x12\x11\n\tsystem_id\x18\x01 \x01(\x03\x12\x12\n\ndataset_id\x18\x02 \x01(\x03\x12\x15\n\rprocessing_id\x18\x03 \x01(\x03\x12-\n\x06impact\x18\x04 \x01(\x0e\x32\x1d.ProtoGraph.Processing.Impact\x12\x33\n\tfreshness\x18\x05 \x01(\x0e\x32 .ProtoGraph.Processing.Freshness\x12\x0e\n\x06inputs\x18\x06 \x01(\x08\"W\n\x06Impact\x12\x08\n\x04\x44OWN\x10\x00\x12\x15\n\x11SEVERELY_DEGRADED\x10\x01\x12\x0c\n\x08\x44\x45GRADED\x10\x02\x12\x14\n\x10OPPORTUNITY_LOSS\x10\x03\x12\x08\n\x04NONE\x10\x04\"H\n\tFreshness\x12\r\n\tIMMEDIATE\x10\x00\x12\x07\n\x03\x44\x41Y\x10\x01\x12\x08\n\x04WEEK\x10\x02\x12\x0e\n\nEVENTUALLY\x10\x03\x12\t\n\x05NEVER\x10\x04\x1a\xcb\x01\n\rDataIntegrity\x12\x19\n\x11\x64\x61ta_integrity_id\x18\x01 \x01(\x03\x12\x1d\n\x15\x64\x61taset_collection_id\x18\x02 \x01(\x03\x12\x1f\n\x17\x64\x61ta_integrity_rec_time\x18\x03 \x01(\t\x12\x1c\n\x14\x64\x61ta_integrity_volat\x18\x04 \x01(\x08\x12\x1f\n\x17\x64\x61ta_integrity_reg_time\x18\x05 \x01(\t\x12 \n\x18\x64\x61ta_integrity_rest_time\x18\x06 \x01(\t\"s\n\x03\x45nv\x12\x13\n\x0f\x44\x45VELOPMENT_ENV\x10\x00\x12\x10\n\x0cPERSONAL_ENV\x10\x01\x12\x12\n\x0ePRODUCTION_ENV\x10\x02\x12\x0f\n\x0bSTAGING_ENV\x10\x03\x12\x0f\n\x0bTESTING_ENV\x10\x04\x12\x0f\n\x0bUNKNOWN_ENV\x10\x05\x62\x06proto3'
 )
 
 
@@ -54,8 +54,8 @@ _PROTOGRAPH_SYSTEM_SYSTEMCRITICALITY = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1008,
-  serialized_end=1134,
+  serialized_start=993,
+  serialized_end=1119,
 )
 _sym_db.RegisterEnumDescriptor(_PROTOGRAPH_SYSTEM_SYSTEMCRITICALITY)
 
@@ -94,8 +94,8 @@ _PROTOGRAPH_PROCESSING_IMPACT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1329,
-  serialized_end=1416,
+  serialized_start=1314,
+  serialized_end=1401,
 )
 _sym_db.RegisterEnumDescriptor(_PROTOGRAPH_PROCESSING_IMPACT)
 
@@ -134,8 +134,8 @@ _PROTOGRAPH_PROCESSING_FRESHNESS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1418,
-  serialized_end=1490,
+  serialized_start=1403,
+  serialized_end=1475,
 )
 _sym_db.RegisterEnumDescriptor(_PROTOGRAPH_PROCESSING_FRESHNESS)
 
@@ -179,8 +179,8 @@ _PROTOGRAPH_ENV = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1698,
-  serialized_end=1813,
+  serialized_start=1683,
+  serialized_end=1798,
 )
 _sym_db.RegisterEnumDescriptor(_PROTOGRAPH_ENV)
 
@@ -343,7 +343,7 @@ _PROTOGRAPH_DATASET = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='dataset_env', full_name='ProtoGraph.Dataset.dataset_env', index=3,
+      name='env', full_name='ProtoGraph.Dataset.env', index=3,
       number=4, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -383,7 +383,7 @@ _PROTOGRAPH_DATASET = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=619,
-  serialized_end=789,
+  serialized_end=781,
 )
 
 _PROTOGRAPH_SYSTEM = _descriptor.Descriptor(
@@ -416,7 +416,7 @@ _PROTOGRAPH_SYSTEM = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='system_env', full_name='ProtoGraph.System.system_env', index=3,
+      name='env', full_name='ProtoGraph.System.env', index=3,
       number=4, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -456,8 +456,8 @@ _PROTOGRAPH_SYSTEM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=792,
-  serialized_end=1134,
+  serialized_start=784,
+  serialized_end=1119,
 )
 
 _PROTOGRAPH_PROCESSING = _descriptor.Descriptor(
@@ -524,8 +524,8 @@ _PROTOGRAPH_PROCESSING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1137,
-  serialized_end=1490,
+  serialized_start=1122,
+  serialized_end=1475,
 )
 
 _PROTOGRAPH_DATAINTEGRITY = _descriptor.Descriptor(
@@ -590,8 +590,8 @@ _PROTOGRAPH_DATAINTEGRITY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1493,
-  serialized_end=1696,
+  serialized_start=1478,
+  serialized_end=1681,
 )
 
 _PROTOGRAPH = _descriptor.Descriptor(
@@ -665,16 +665,16 @@ _PROTOGRAPH = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=40,
-  serialized_end=1813,
+  serialized_end=1798,
 )
 
 _PROTOGRAPH_COLLECTION.containing_type = _PROTOGRAPH
 _PROTOGRAPH_DATASETCOLLECTION.containing_type = _PROTOGRAPH
 _PROTOGRAPH_SYSTEMCOLLECTION.containing_type = _PROTOGRAPH
-_PROTOGRAPH_DATASET.fields_by_name['dataset_env'].enum_type = _PROTOGRAPH_ENV
+_PROTOGRAPH_DATASET.fields_by_name['env'].enum_type = _PROTOGRAPH_ENV
 _PROTOGRAPH_DATASET.containing_type = _PROTOGRAPH
 _PROTOGRAPH_SYSTEM.fields_by_name['system_critic'].enum_type = _PROTOGRAPH_SYSTEM_SYSTEMCRITICALITY
-_PROTOGRAPH_SYSTEM.fields_by_name['system_env'].enum_type = _PROTOGRAPH_ENV
+_PROTOGRAPH_SYSTEM.fields_by_name['env'].enum_type = _PROTOGRAPH_ENV
 _PROTOGRAPH_SYSTEM.containing_type = _PROTOGRAPH
 _PROTOGRAPH_SYSTEM_SYSTEMCRITICALITY.containing_type = _PROTOGRAPH_SYSTEM
 _PROTOGRAPH_PROCESSING.fields_by_name['impact'].enum_type = _PROTOGRAPH_PROCESSING_IMPACT
