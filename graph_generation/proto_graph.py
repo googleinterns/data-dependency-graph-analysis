@@ -167,7 +167,7 @@ class ProtoGraph:
         dataset.dataset_id = dataset_id
         dataset.dataset_collection_id = dataset_collection_id
         dataset.slo = slo
-        dataset.dataset_env = self._get_env_enum(env)
+        dataset.env = self._get_env_enum(env)
         dataset.regex_grouping = regex_grouping
         dataset.name = name
         dataset.description = description
@@ -179,7 +179,7 @@ class ProtoGraph:
         system.system_id = system_id
         system.system_collection_id = system_collection_id
         system.system_critic = self._get_system_criticality_enum(system_critic)
-        system.system_env = self._get_env_enum(env)
+        system.env = self._get_env_enum(env)
         system.regex_grouping = regex_grouping
         system.name = name
         system.description = description
