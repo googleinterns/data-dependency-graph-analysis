@@ -48,7 +48,7 @@ class TestNxGraph(unittest.TestCase):
     def test_get_one_to_many_connections(self):
         """
         Tests if method get_one_to_many_connection generates connections with given distribution.
-        To compare config parameter distribuion, and generated distribution Kolmogorov-Smirnov statistic is used.
+        Kolmogorov-Smirnov statistic is used to compare config parameter and generated distributions.
         """
         # Arrange: generate a random integer list, get a count map and number of elements.
         original_element_count = [random.randint(1, 500) for i in range(10000)]
