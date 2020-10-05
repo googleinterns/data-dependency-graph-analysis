@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>A -> B analysis</title>
+    <meta charset="utf-8">
+
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js">script></script>
+
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/vega@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@3.0.0-rc12"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@3"></script>
+    <script src="https://vega.github.io/datalib/datalib.min.js"></script>
+
+    <!-- Import Vega 3 & Vega-Lite 2 (does not have to be from CDN) -->
+    <link rel="stlesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/vega-tooltip@0.16.0/vega-tooltip.scss">
+
+    <script src="https://cdn.jsdelivr.net/npm/vega-tooltip@0.16.0/build/vega-tooltip.min.js"></script>
+
+    <style>hr, h3 {padding-bottom: 20px;}canvas {background-color: #fffff;}</style>
+    <style>
+    div.waterfall {
+        width: 1200px;
+        height: 300px;
+        overflow-x: auto;
+        overflow-y: auto;
+    }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="charts text-center">
+        <div class="paths" id="paths"></div><hr>
+        <div class="slo" id="slo"></div><hr>
+        <div class="data_integrity" id="data_integrity"></div><hr>
+    </div>
+</div>
+
+<!-- Render Charts -->
+<script type="text/javascript">
+      function parse(url, div) {
+        var opt = {
+          mode: "vega-lite",
+          renderer: "svg",
+          actions: {export: true, source: false, editor: false}
+        };
+
+        vegaEmbed("#"+div, url, opt, function(error, result) {
+          // result.view is the Vega View, url is the original Vega-Lite specification
+          vegaTooltip.vegaLite(result.view, url);
+        });
+      }
+      parse("/a_b/paths", "paths")
+      parse("/a_b/slo", "slo")
+      parse("/a_b/data_integrity", "data_integrity")
+    </script>
+
+</body>
+</html>
