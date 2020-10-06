@@ -11,17 +11,15 @@
 
     <script src="https://d3js.org/d3.v3.min.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/vega@4"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-lite@3.0.0-rc12"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-embed@3"></script>
-    <script src="https://vega.github.io/datalib/datalib.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega@5.13.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@4.8.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
 
-    <!-- Import Vega 3 & Vega-Lite 2 (does not have to be from CDN) -->
-    <link rel="stlesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/vega-tooltip@0.16.0/vega-tooltip.scss">
+    <!-- Import Vega 5 & Vega-Lite 4 (does not have to be from CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/vega-tooltip@0.24.2/build/vega-tooltip.min.js"></script>
+    <link rel="stlesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/vega-tooltip@0.24.2/vega-tooltip.scss">
 
-    <script src="https://cdn.jsdelivr.net/npm/vega-tooltip@0.16.0/build/vega-tooltip.min.js"></script>
-
-    <style>hr, h3 {padding-bottom: 20px;}canvas {background-color: #fffff;}</style>
+    <style>hr, h3 {padding-bottom: 20px;}canvas {background-color: #f5f3f2;}</style>
     <style>
     div.waterfall {
         width: 1200px;
@@ -32,7 +30,7 @@
     </style>
 </head>
 <body>
-<div class="container">
+<div class="container" style="background-color: #f5f3f2;">
     <div class="charts text-center">
         <div class="paths" id="paths"></div><hr>
         <div class="slo" id="slo"></div><hr>
@@ -42,22 +40,9 @@
 
 <!-- Render Charts -->
 <script type="text/javascript">
-      function parse(url, div) {
-        var opt = {
-          mode: "vega-lite",
-          renderer: "svg",
-          actions: {export: true, source: false, editor: false}
-        };
-
-        vegaEmbed("#"+div, url, opt, function(error, result) {
-          // result.view is the Vega View, url is the original Vega-Lite specification
-          vegaTooltip.vegaLite(result.view, url);
-        });
-      }
-      parse("/a_b/paths", "paths")
-      parse("/a_b/slo", "slo")
-      parse("/a_b/data_integrity", "data_integrity")
+      vegaEmbed("#paths", "/a_b/paths")
+      vegaEmbed("#slo", "/a_b/slo")
+      vegaEmbed("#data_integrity", "/a_b/data_integrity")
     </script>
-
 </body>
 </html>

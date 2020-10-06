@@ -1,8 +1,37 @@
+"""This module extracts features in pandas DataFrame format for creating charts."""
+
 import pandas as pd
 import networkx as nx
 
 
 class ABFeatureExtraction:
+    """
+        A class to extract features from a networkx graph for A->B analysis.
+
+        ...
+
+        Methods:
+            find_breakout_intervals(base_path, forked_path)
+                Generates intervals for forked path coordinate calculation.
+
+            generate_coordinates(paths, range_x=(10, 890), range_y=(10, 290))
+                Generates coordinates for paths and nodes placement in a space.
+
+            get_paths_df()
+                Generates dataframes with paths from A->B for a line chart.
+
+            get_point_df()
+                Generates dataframe with points for node scatter plot.
+
+            process_time(t)
+                Converts time string to seconds.
+
+            get_slo_df(curr_start=50)
+                Returns dataframe with slo features.
+
+            get_data_integrity_df()
+                Returns dataframe with data integrity features.
+    """
     def __init__(self, A, B, G, cutoff=50, n=10):
         self.G = G
         paths = list(nx.all_simple_paths(G, source=f"dataset_{A}", target=f"dataset_{B}", cutoff=cutoff))
@@ -53,6 +82,7 @@ class ABFeatureExtraction:
         return base_path_break_ids, forked_path_break_ids
 
     def generate_coordinates(self, paths, range_x=(10, 890), range_y=(10, 290)):
+        """Generates coordinates for paths and nodes placement in a space."""
         min_x, max_x = range_x
         min_y, max_y = range_y
 
@@ -84,6 +114,7 @@ class ABFeatureExtraction:
         return paths_coords
 
     def get_paths_df(self):
+        """Generates dataframes with paths from A->B for a chart."""
         paths_df = []
         for path in self.top_n_paths:
             path_nodes = []
@@ -93,6 +124,7 @@ class ABFeatureExtraction:
         return paths_df
 
     def get_point_df(self):
+        """Generates dataframe with points for node scatter plot."""
         point_df = pd.DataFrame.from_dict(self.nodes_coordinates, orient='index', columns = ["x", "y"])
         # Get path id for each node. If node is in multiple paths assign id of the shortest path.
         point_path = {}
@@ -106,10 +138,12 @@ class ABFeatureExtraction:
 
     @staticmethod
     def process_time(t):
+        """Converts time string to seconds."""
         time_to_seconds = {"s": 1, "m": 60, "h": 3600, "d": 86400}
         return int(t[:-1]) * time_to_seconds[t[-1]]
 
     def get_slo_df(self, curr_start=50):
+        """Returns dataframe with slo features."""
         slos = []
         for dataset in self.shortest_path[::4]:
             slos.append(self.process_time(self.G.nodes()[dataset]['slo']))
@@ -125,6 +159,7 @@ class ABFeatureExtraction:
         return slo_df
 
     def get_data_integrity_df(self):
+        """Returns dataframe with data integrity features."""
         dataset_collections = [f"dataset_collection_{self.G.nodes()[d]['dataset_collection_id']}" for d in self.shortest_path[::4]]
         collection_neighbours = [nx.neighbors(self.G, collection) for collection in dataset_collections]
         data_integrity = [i for neighbours in collection_neighbours for i in neighbours if i.startswith("data_integrity")]
@@ -134,6 +169,7 @@ class ABFeatureExtraction:
         reconstruction_time = [self.process_time(t) for t in reconstruction_time_string]
         regeneration_time = [self.process_time(t) for t in regeneration_time_string]
         restoration_time = [self.process_time(t) for t in restoration_time_string]
+        is_volatile = [self.G.nodes()[di]["data_integrity_volat"] for di in data_integrity]
 
         data_integrity_df = pd.DataFrame({
             "dataset_id": self.shortest_path[::4],
@@ -143,7 +179,8 @@ class ABFeatureExtraction:
             "restoration_time_duration": restoration_time,
             "reconstruction_time_string": reconstruction_time_string,
             "regeneration_time_string": regeneration_time_string,
-            "restoration_time_string": restoration_time_string
+            "restoration_time_string": restoration_time_string,
+            "volatility": is_volatile
         })
 
         return data_integrity_df
