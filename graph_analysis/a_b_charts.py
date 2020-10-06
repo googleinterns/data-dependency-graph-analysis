@@ -11,7 +11,7 @@ import altair as alt
 
 class ABCharts:
     """
-    A class to extract features from a networkx graph for A->B analysis.
+    A class to draw charts for A->B analysis.
 
     ...
 
