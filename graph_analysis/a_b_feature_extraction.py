@@ -33,17 +33,25 @@ class ABFeatureExtraction:
                 Returns dataframe with data integrity features.
     """
     def __init__(self, A, B, G, cutoff=50, n=10):
+        """
+        Args:
+            A - Dataset A id, integer.
+            B - Dataset B id, integer.
+            G - Networkx graph instance.
+            cutoff - Depth to stop the search for paths. Only paths of length <= cutoff are added, integer.
+            n - Maximum number of paths to return.
+        """
         self.G = G
         paths = list(nx.all_simple_paths(G, source=f"dataset_{A}", target=f"dataset_{B}", cutoff=cutoff))
         self.shortest_path = nx.shortest_path(G, source=f"dataset_{A}", target=f"dataset_{B}")
-        sort_by_length = sorted(paths, key=lambda x: len(x))
+        sorted_paths = sorted(paths, key=lambda x: len(x))
         self.top_n_paths = [[node for node in path if not node.startswith("processing")]
-                             for path in sort_by_length[:n]]
+                             for path in sorted_paths[:n]]
         self.nodes_coordinates = self.generate_coordinates(self.top_n_paths)
-        self.paths_df = self.get_paths_df()
-        self.point_df = self.get_point_df()
-        self.slo_df = self.get_slo_df()
-        self.data_integrity_df = self.get_data_integrity_df()
+        self.paths_df = self.get_paths_dataframe()
+        self.point_df = self.get_point_dataframe()
+        self.slo_df = self.get_slo_dataframe()
+        self.data_integrity_df = self.get_data_integrity_dataframe()
 
     @staticmethod
     def find_breakout_intervals(base_path, forked_path):
@@ -86,6 +94,7 @@ class ABFeatureExtraction:
         min_x, max_x = range_x
         min_y, max_y = range_y
 
+        # Declare constant for x_step calculation to avoid zero division.
         alpha = 0.00001
         step_y = (max_y - min_y) / (len(paths) - 1)
         path_ids = [(-1) ** i * i // 2 for i in range(len(paths))]
@@ -113,7 +122,7 @@ class ABFeatureExtraction:
 
         return paths_coords
 
-    def get_paths_df(self):
+    def get_paths_dataframe(self):
         """Generates dataframes with paths from A->B for a chart."""
         paths_df = []
         for path in self.top_n_paths:
@@ -123,7 +132,7 @@ class ABFeatureExtraction:
             paths_df.append(pd.DataFrame(path_nodes, columns = ["node", "x", "y"]))
         return paths_df
 
-    def get_point_df(self):
+    def get_point_dataframe(self):
         """Generates dataframe with points for node scatter plot."""
         point_df = pd.DataFrame.from_dict(self.nodes_coordinates, orient='index', columns = ["x", "y"])
         # Get path id for each node. If node is in multiple paths assign id of the shortest path.
@@ -142,7 +151,7 @@ class ABFeatureExtraction:
         time_to_seconds = {"s": 1, "m": 60, "h": 3600, "d": 86400}
         return int(t[:-1]) * time_to_seconds[t[-1]]
 
-    def get_slo_df(self, curr_start=50):
+    def get_slo_dataframe(self, curr_start=50):
         """Returns dataframe with slo features."""
         slos = []
         for dataset in self.shortest_path[::4]:
@@ -158,7 +167,7 @@ class ABFeatureExtraction:
         slo_df = pd.DataFrame(slo_ranges, columns=["dataset_id", "slo"])
         return slo_df
 
-    def get_data_integrity_df(self):
+    def get_data_integrity_dataframe(self):
         """Returns dataframe with data integrity features."""
         dataset_collections = [f"dataset_collection_{self.G.nodes()[d]['dataset_collection_id']}" for d in self.shortest_path[::4]]
         collection_neighbours = [nx.neighbors(self.G, collection) for collection in dataset_collections]
